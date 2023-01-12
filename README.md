@@ -1,6 +1,6 @@
 # cvelistV5
 
-| Work In Progress
+> Work In Progress
 
 This repository is a JSON 5.0 view of the official CVE List. It is a work in progress.
 
