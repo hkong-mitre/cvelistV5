@@ -1,0 +1,58 @@
+# proof of concept for bulk download
+
+name: poc_test
+
+on:
+  push:
+    branches: ['hk/bulk_download__0_spike']
+  # pull_request:
+  #   branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  generate-name:
+    environment: test
+    runs-on: ubuntu-latest
+    outputs:
+      v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
+    steps:
+      - name: generate-name
+        id: get-timestamp
+        run: echo "out=$(date '+%Y-%m-%d_%H_%M_%S')" >> $GITHUB_OUTPUT
+  create_artifacts:
+    needs: generate-name
+    environment: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone cves
+        uses: actions/checkout@v3
+      - name: prep 1999 cves for zip download
+        run: |
+          pwd
+          ls -al
+          # zip -r cves.zip .
+          # do a subset
+          zip -r cves.zip review_set/1999
+          git tag v0.0.0-${{ needs.generate-name.outputs.v_current_run_timestamp }}
+          git push origin v0.0.0-${{ needs.generate-name.outputs.v_current_run_timestamp }}
+
+      - name: Use the Upload Artifact GitHub Action
+        uses: actions/upload-artifact@v3
+        with:
+          name: cves.zip
+          path: ./cves.zip
+
+      - name: Use Environment Secret
+        run: |
+          echo '${{secrets.TEST_ENVIRONMENT_VAR}}'
+
+      - name: use REST API
+        run: |
+          # curl --location --request GET '${{secrets.CVE_API_HOST}}/cve?time_modified.gt=2022-12-10T00:00:00' \
+          #  --header 'CVE-API-ORG: mitre' \
+          #  --header 'CVE-API-USER: ${{secrets.CVE_API_USER}}' \
+          #  --header 'CVE-API-KEY: ${{secrets.CVE_API_KEY}}' \
+          #  --header 'Content-Type: application/json'
+          curl https://raw.githubusercontent.com/CVEProject/cvelist/master/1999/0xxx/CVE-1999-0001.json
