@@ -1,0 +1,2 @@
+# exclude any hidden files and folders from the generated tarball
+.*           export-ignore
