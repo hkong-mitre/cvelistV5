@@ -7,10 +7,13 @@ on:
     branches: ['hk/bulk_download_0_spike']
   # pull_request:
   #   branches: [ "main" ]
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: false
+        default: 'debug'
 jobs:
   generate-name:
     environment: test
