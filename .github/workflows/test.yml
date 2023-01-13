@@ -4,7 +4,7 @@ name: poc_test
 
 on:
   push:
-    branches: ['hk/bulk_download__0_spike']
+    branches: ['hk/bulk_download_0_spike']
   # pull_request:
   #   branches: [ "main" ]
 
