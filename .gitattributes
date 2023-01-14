@@ -1,2 +1,8 @@
 # exclude any hidden files and folders from the generated tarball
-.*           export-ignore
+
+# repository source files
+.*          export-ignore
+README.md   export-ignore
+
+# MacOS files
+.DS_Store   export-ignore
