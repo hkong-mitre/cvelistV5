@@ -3,11 +3,15 @@
 name: poc_test
 
 on:
-  push:
-    branches: ['hk/bulk_download_0_spike']
+  # push:
+  #   branches: ['hk/bulk_download_0_spike']
   # pull_request:
   #   branches: [ "main" ]
   # Allows you to run this workflow manually from the Actions tab
+  schedule:
+    # at 0 min after each hour (note this does not include update at 0 min after each hour
+    #   since that job will be running in parallel to this)
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       logLevel:
