@@ -18,7 +18,7 @@ on:
         default: 'debug'
 jobs:
   generate-name:
-    environment: test
+    environment: development
     runs-on: ubuntu-latest
     outputs:
       v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
@@ -50,15 +50,10 @@ jobs:
   #         name: cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}.zip
   #         path: ./cves.zip
   create_release:
-    needs: [generate-name, create_artifacts]
-    environment: test
+    needs: [generate-name]
+    environment: development
     runs-on: ubuntu-latest
     steps:
-      # - name: generate release
-      #   run: |
-      #     gh release create cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}
-      #     gh release create cves_${{ needs.generate-name.outputs.v_current_run_timestamp }} --title "CVEs on ${{ needs.generate-name.outputs.v_current_run_timestamp }}" --notes "this is a release of the latest CVEs as of ${{ needs.generate-name.outputs.v_current_run_timestamp }}." --latest
-
       # - name: create release
       #   id: create_release
       #   uses: actions/create-release@v1
@@ -70,7 +65,8 @@ jobs:
       #     draft: false
       #     prerelease: false
       #     # make_latest: true
-
+      - name: generate release notes
+        run: echo "# Good things have arrived" > release_notes.md
       - name: create release with artifacts
         id: bundle_artifacts
         uses: softprops/action-gh-release@v1
@@ -79,7 +75,8 @@ jobs:
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
         with:
           name: CVE ${{ needs.generate-name.outputs.v_current_run_timestamp }}
-          body: Descriptions for CVE ${{ needs.generate-name.outputs.v_current_run_timestamp }} goes here
+          # body: Descriptions for CVE ${{ needs.generate-name.outputs.v_current_run_timestamp }} goes here
+          body_path: ./release_notes.md
           tag_name: cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
           # files: |
           #   cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}.zip
