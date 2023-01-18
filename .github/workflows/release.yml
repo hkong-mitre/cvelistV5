@@ -59,24 +59,27 @@ jobs:
       #     gh release create cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}
       #     gh release create cves_${{ needs.generate-name.outputs.v_current_run_timestamp }} --title "CVEs on ${{ needs.generate-name.outputs.v_current_run_timestamp }}" --notes "this is a release of the latest CVEs as of ${{ needs.generate-name.outputs.v_current_run_timestamp }}." --latest
 
-      - name: create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
-          release_name: CVE Release ${{ needs.generate-name.outputs.v_current_run_timestamp }}
-          draft: false
-          prerelease: false
-          # make_latest: true
+      # - name: create release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
+      #     release_name: CVE Release ${{ needs.generate-name.outputs.v_current_run_timestamp }}
+      #     draft: false
+      #     prerelease: false
+      #     # make_latest: true
 
-      - name: bundle artifacts
+      - name: create release with artifacts
         id: bundle_artifacts
         uses: softprops/action-gh-release@v1
         # if: startsWith(github.ref, 'refs/tags/')
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
         with:
+          name: CVE ${{ needs.generate-name.outputs.v_current_run_timestamp }}
+          body: Descriptions for CVE ${{ needs.generate-name.outputs.v_current_run_timestamp }} goes here
+          tag_name: cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
           files: |
             cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}.zip
