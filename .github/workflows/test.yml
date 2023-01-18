@@ -4,14 +4,14 @@ name: poc_test
 
 on:
   # push:
-  #   branches: ['hk/bulk_download_0_spike']
+  #   branches: ['main']
   # pull_request:
   #   branches: [ "main" ]
-  # Allows you to run this workflow manually from the Actions tab
   schedule:
     # at 0 min after each hour (note this does not include update at 0 min after each hour
     #   since that job will be running in parallel to this)
     - cron: '0 * * * *'
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
       logLevel:
@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: generate-name
         id: get-timestamp
-        run: echo "out=$(date '+%Y-%m-%d_%H_%M_%S')" >> $GITHUB_OUTPUT
+        run: echo "out=$(date '+%Y-%m-%d_%H%M_UTC')" >> $GITHUB_OUTPUT
   create_artifacts:
     needs: generate-name
     environment: test
@@ -39,7 +39,7 @@ jobs:
         run: |
           git tag cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
           git push origin cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
-      - name: prep 1999 cves for zip download
+      - name: build cves for zip download
         run: |
           pwd
           ls -al
@@ -53,11 +53,38 @@ jobs:
           name: cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}.zip
           path: ./cves.zip
 
-      - name: Use Environment Secret
+  create_release:
+    needs: [generate-name, create_artifacts]
+    environment: test
+    runs-on: ubuntu-latest
+    steps:
+      # - name: generate release
+      #   run: |
+      #     gh release create cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}
+      #     gh release create cves_${{ needs.generate-name.outputs.v_current_run_timestamp }} --title "CVEs on ${{ needs.generate-name.outputs.v_current_run_timestamp }}" --notes "this is a release of the latest CVEs as of ${{ needs.generate-name.outputs.v_current_run_timestamp }}." --latest
+
+      - name: create release
+        id: create_release
+        uses: actions/create-release@v1
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
+          release_name: CVE Release ${{ needs.generate-name.outputs.v_current_run_timestamp }}
+          draft: false
+          prerelease: false
+          make_latest: true
+
+  test_capabilities:
+    needs: generate-name
+    environment: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Environment Secret
         run: |
           echo '${{secrets.TEST_ENVIRONMENT_VAR}}'
 
-      - name: use REST API
+      - name: Test REST API
         run: |
           # curl --location --request GET '${{secrets.CVE_API_HOST}}/cve?time_modified.gt=2022-12-10T00:00:00' \
           #  --header 'CVE-API-ORG: mitre' \
