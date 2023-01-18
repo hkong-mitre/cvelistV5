@@ -45,12 +45,12 @@ jobs:
           ls -al
           zip -r cves.zip ./review_set -x "*/\.*"
           # do a subset
-          zip -r cves1999.zip ./review_set/1999 -x "*/\.*"
+          # zip -r cves1999.zip ./review_set/1999 -x "*/\.*"
 
       - name: Use the Upload Artifact GitHub Action
         uses: actions/upload-artifact@v3
         with:
-          name: cves.zip
+          name: cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}.zip
           path: ./cves.zip
 
       - name: Use Environment Secret
