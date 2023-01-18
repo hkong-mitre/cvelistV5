@@ -75,6 +75,8 @@ jobs:
         id: bundle_artifacts
         uses: softprops/action-gh-release@v1
         # if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
         with:
           files: |
             cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}.zip
