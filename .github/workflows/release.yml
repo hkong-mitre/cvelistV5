@@ -1,4 +1,4 @@
-# Github Actions for hourly releases
+# Github Action for hourly releases
 
 name: CVE Release
 
