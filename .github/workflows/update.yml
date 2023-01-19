@@ -28,7 +28,7 @@ jobs:
         # run: echo "out=$(date '+%Y-%m-%d_%H%M_UTC')" >> $GITHUB_OUTPUT
         run: |
           TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
-          echo "$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
       - name: update-log
         run: echo "$TEMP_TIMESTAMP" >> update_log.md
       # - name: create release with source code as artifacts
