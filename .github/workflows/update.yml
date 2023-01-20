@@ -35,6 +35,8 @@ jobs:
         run: |
           echo "$TEMP_TIMESTAMP" >> update_log.md
           git remote set-url origin https://${GITHUB_TOKEN}@github.com/hkong-mitre/cvelistV5.git
+          git config user.email "you@example.com"
+          git config user.name "Github Action"
           git add update_log.md
           git commit -m "abc"
           git push
