@@ -30,7 +30,11 @@ jobs:
           TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
       - name: update-log
-        run: echo "$TEMP_TIMESTAMP" >> update_log.md
+        run: |
+          echo "$TEMP_TIMESTAMP" >> update_log.md
+          git add update_log.md
+          git commit -m "abc"
+          git push
       # - name: create release with source code as artifacts
       #   uses: softprops/action-gh-release@v1
       #   with:
