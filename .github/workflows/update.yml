@@ -23,16 +23,13 @@ jobs:
     outputs:
       v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
     steps:
-      - name: get-timestamp
-        id: get-timestamp
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: update log
         # run: echo "out=$(date '+%Y-%m-%d_%H%M_UTC')" >> $GITHUB_OUTPUT
         run: |
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: update-log
-        run: |
           echo $TEMP_TIMESTAMP >> update_log.md
           git remote set-url origin https://${GITHUB_TOKEN}@github.com/hkong-mitre/cvelistV5.git
           git config user.email "you@example.com"
