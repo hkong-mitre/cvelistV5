@@ -17,7 +17,7 @@ on:
         required: false
         default: 'debug'
 jobs:
-  generate-name:
+  update-cves:
     environment: development
     runs-on: ubuntu-latest
     outputs:
@@ -29,6 +29,8 @@ jobs:
         run: |
           TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: update-log
         run: |
           echo "$TEMP_TIMESTAMP" >> update_log.md
