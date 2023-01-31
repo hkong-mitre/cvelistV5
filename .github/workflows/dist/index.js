@@ -31100,6 +31100,8 @@ main.config();
     const activitiesFilePath = `${process.env.CVES_BASE_DIRECTORY}/recent_activities.json`;
     CveUpdater.writeActivityFile(activitiesFilePath, `[]`);
     const updater = new CveUpdater(`Test`);
+    console.log(`environment.CVES_BASE_DIRECTORY=`, process.env.CVES_BASE_DIRECTORY);
+    console.log(`environment.CVE_SERVICES_URL=`, process.env.CVE_SERVICES_URL);
     // ----- update by window
     const args = process.argv;
     const since = args[2] || new Date(Date.now() - (30 * 60 * 1000)).toISOString();
