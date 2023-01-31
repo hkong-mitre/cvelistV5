@@ -31,7 +31,7 @@ jobs:
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
-          node ./dist/index.js
+          node ./.github/workflows/dist/index.js
           git add preview_cves
           git commit -m "[UPDATE] updated/added CVEs from cveawg.mitre.org"
           git remote set-url origin https://${GITHUB_TOKEN}@github.com/hkong-mitre/cvelistV5.git
