@@ -34,6 +34,7 @@ jobs:
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
+          echo "CVE_SERVICES_URL=$CVE_SERVICES_URL"
           node ./.github/workflows/dist/index.js
           git add preview_cves
           git commit -m "[UPDATE] updated/added CVEs from cveawg.mitre.org"
