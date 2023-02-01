@@ -21,8 +21,8 @@ jobs:
     environment: development
     runs-on: ubuntu-latest
     env:
-      CVE_SERVICES_URL: ${{env.CVE_SERVICES_URL}}
-      CVE_UTILS_DEFAULT_OUTDIR: ${{env.CVE_UTILS_DEFAULT_OUTDIR}}
+      CVE_SERVICES_URL: ${{CVE_SERVICES_URL}}
+      CVE_UTILS_DEFAULT_OUTDIR: ${{CVE_UTILS_DEFAULT_OUTDIR}}
     outputs:
       v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
     steps:
@@ -34,7 +34,7 @@ jobs:
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
-          echo "CVE_SERVICES_URL=$CVE_SERVICES_URL"
+          env
           node ./.github/workflows/dist/index.js
           git add preview_cves
           git commit -m "[UPDATE] updated/added CVEs from cveawg.mitre.org"
