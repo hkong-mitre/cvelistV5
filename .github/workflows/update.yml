@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CVE_SERVICES_URL: https://cveawg.mitre.org/api/cve
-      # CVE_UTILS_DEFAULT_OUTDIR: ./preview_cves
+      CVE_UTILS_DEFAULT_OUTDIR: ./preview_cves
     outputs:
       v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
     steps:
@@ -44,6 +44,14 @@ jobs:
           git add update_log.md
           git commit -m "abc"
           git push
+
+          curl --location --request GET '${{secrets.CVE_API_HOST}}/cve?time_modified.gt=2022-12-10T00:00:00' \
+           --header 'CVE-API-ORG: mitre' \
+           --header 'CVE-API-USER: ${{secrets.CVE_API_USER}}' \
+           --header 'CVE-API-KEY: ${{secrets.CVE_API_KEY}}' \
+           --header 'Content-Type: application/json'
+          # curl https://raw.githubusercontent.com/CVEProject/cvelist/master/1999/0xxx/CVE-1999-0001.json
+
       # - name: create release with source code as artifacts
       #   uses: softprops/action-gh-release@v1
       #   with:
