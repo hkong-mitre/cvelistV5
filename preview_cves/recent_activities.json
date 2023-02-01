@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-01T06:36:32.496Z",
-    "duration": "1595 msecs",
+    "timestamp": "2023-02-01T06:46:41.956Z",
+    "duration": "1056 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-01T06:06:31.212Z",
-      "endWindow": "2023-02-01T06:36:31.212Z",
+      "startWindow": "2023-02-01T06:16:41.152Z",
+      "endWindow": "2023-02-01T06:46:41.152Z",
       "count": 11,
       "cveIds": [
         "CVE-2020-14395",
