@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CVE_SERVICES_URL: https://cveawg.mitre.org/api/cve
-      CVES_BASE_DIRECTORY: ./preview_cves
+      # CVES_BASE_DIRECTORY: ./preview_cves
     outputs:
       v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
     steps:
@@ -35,7 +35,7 @@ jobs:
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
           env
-          node ./.github/workflows/dist/index.js ${{secrets.CVE_API_ORG}} ${{secrets.CVE_API_USER}}
+          node ./.github/workflows/dist/index.js ${{secrets.CVE_API_ORG}} ${{env.CVES_BASE_DIRECTORY}}
           git add preview_cves
           git commit -m "[UPDATE] updated/added CVEs from cveawg.mitre.org"
           git remote set-url origin https://${GITHUB_TOKEN}@github.com/hkong-mitre/cvelistV5.git
