@@ -21,8 +21,8 @@ jobs:
     environment: development
     runs-on: ubuntu-latest
     env:
-      CVE_SERVICES_URL: ${{vars.CVE_SERVICES_URL}}
-      CVE_UTILS_DEFAULT_OUTDIR: ${{vars.CVE_UTILS_DEFAULT_OUTDIR}}
+      CVE_SERVICES_URL: ${{env.CVE_SERVICES_URL}}
+      CVE_UTILS_DEFAULT_OUTDIR: ${{env.CVE_UTILS_DEFAULT_OUTDIR}}
     outputs:
       v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
     steps:
