@@ -24,7 +24,7 @@ jobs:
       CVE_SERVICES_URL: https://cveawg.mitre.org/api/cve
       CVES_BASE_DIRECTORY: ./preview_cves
       CVE_API_ORG: ${{secrets.CVE_API_ORG}}
-      CVE_API_USER: ${{secretsCVE_API_USER.}}
+      CVE_API_USER: ${{secrets.CVE_API_USER.}}
       CVE_API_KEY: ${{secrets.CVE_API_KEY}}
     outputs:
       v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
