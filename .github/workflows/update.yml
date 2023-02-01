@@ -38,7 +38,7 @@ jobs:
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
           env
-          node ./.github/workflows/dist/index.js ${{CVE_API_ORG}} ${{env.CVES_BASE_DIRECTORY}}
+          node ./.github/workflows/dist/index.js
           git add preview_cves
           git commit -m "[UPDATE] updated/added CVEs from cveawg.mitre.org"
           git remote set-url origin https://${GITHUB_TOKEN}@github.com/hkong-mitre/cvelistV5.git
