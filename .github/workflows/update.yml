@@ -37,23 +37,15 @@ jobs:
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
-          env
           node ./.github/workflows/dist/index.js
+          git config user.email "you@example.com"
+          git config user.name "Github Action"
           git add preview_cves
           git commit -m "[UPDATE] updated/added CVEs from cveawg.mitre.org"
           git remote set-url origin https://${GITHUB_TOKEN}@github.com/hkong-mitre/cvelistV5.git
-          git config user.email "you@example.com"
-          git config user.name "Github Action"
           git add update_log.md
-          git commit -m "abc"
+          git commit -m "abc abc"
           git push
-
-          curl --location --request GET '${{secrets.CVE_API_HOST}}/cve?time_modified.gt=2022-12-10T00:00:00' \
-           --header 'CVE-API-ORG: mitre' \
-           --header 'CVE-API-USER: ${{secrets.CVE_API_USER}}' \
-           --header 'CVE-API-KEY: ${{secrets.CVE_API_KEY}}' \
-           --header 'Content-Type: application/json'
-          # curl https://raw.githubusercontent.com/CVEProject/cvelist/master/1999/0xxx/CVE-1999-0001.json
 
       # - name: create release with source code as artifacts
       #   uses: softprops/action-gh-release@v1
