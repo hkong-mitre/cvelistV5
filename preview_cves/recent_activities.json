@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-01T03:31:42.116Z",
-    "duration": "1174 msecs",
+    "timestamp": "2023-02-01T03:41:07.117Z",
+    "duration": "1674 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-01T03:01:41.597Z",
-      "endWindow": "2023-02-01T03:31:41.597Z",
+      "startWindow": "2023-02-01T03:11:05.892Z",
+      "endWindow": "2023-02-01T03:41:05.892Z",
       "count": 8,
       "cveIds": [
         "CVE-2021-22786",
