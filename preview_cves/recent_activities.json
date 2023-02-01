@@ -1,14 +1,18 @@
 [
   {
-    "timestamp": "2023-02-01T14:56:21.390Z",
-    "duration": "1559 msecs",
+    "timestamp": "2023-02-01T15:29:48.984Z",
+    "duration": "1431 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-01T14:26:20.017Z",
-      "endWindow": "2023-02-01T14:56:20.017Z",
-      "count": 1,
+      "startWindow": "2023-02-01T14:59:48.312Z",
+      "endWindow": "2023-02-01T15:29:48.312Z",
+      "count": 5,
       "cveIds": [
-        "CVE-2023-24997"
+        "CVE-2022-29503",
+        "CVE-2022-48093",
+        "CVE-2022-48094",
+        "CVE-2023-23135",
+        "CVE-2023-23136"
       ]
     }
   }
