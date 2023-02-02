@@ -1,13 +1,14 @@
 [
   {
-    "timestamp": "2023-02-02T21:50:09.108Z",
-    "duration": "1026 msecs",
+    "timestamp": "2023-02-02T21:56:32.374Z",
+    "duration": "1183 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-02T21:20:08.561Z",
-      "endWindow": "2023-02-02T21:50:08.561Z",
-      "count": 1,
+      "startWindow": "2023-02-02T21:26:31.934Z",
+      "endWindow": "2023-02-02T21:56:31.934Z",
+      "count": 2,
       "cveIds": [
+        "CVE-2022-48113",
         "CVE-2022-48114"
       ]
     }
