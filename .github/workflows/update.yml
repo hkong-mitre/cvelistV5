@@ -1,9 +1,8 @@
 # Github Action for updates to the repository
 
 name: CVE Update
-
 on:
-  # run every 5 minutes (min Github scheduling allowed)
+  # run every 5~10 minutes (min Github scheduling allowed)
   # note this may not complete when the hourly "CVE Release" workflow starts, so that this update may not be reflected
   #   in the CVE Release artifacts
   # note also that if this job runs longer than 5 minutes, the next job will run 5 minutes after this completes
@@ -22,6 +21,10 @@ on:
       stopTime:
         description: 'stop time of window to fetch CVEs'
         required: false
+      commitMessage:
+        description: 'git commit message'
+        required: false
+        default: '[MANUAL RUN] request window is [xxx,yyy]'
 jobs:
   update-cves:
     environment: development
@@ -43,8 +46,9 @@ jobs:
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
-          node ./.github/workflows/dist/index.js
-          git config user.email "you@example.com"
+          git pull
+          node ./.github/workflows/dist/index.js 
+          git config user.email "github_action@example.com"
           git config user.name "Github Action"
           git add preview_cves
           git add update_log.md
