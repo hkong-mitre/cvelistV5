@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-02T11:49:45.185Z",
-    "duration": "1147 msecs",
+    "timestamp": "2023-02-02T11:56:19.605Z",
+    "duration": "1036 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-02T11:19:44.297Z",
-      "endWindow": "2023-02-02T11:49:44.297Z",
+      "startWindow": "2023-02-02T11:26:18.551Z",
+      "endWindow": "2023-02-02T11:56:18.551Z",
       "count": 2,
       "cveIds": [
         "CVE-2014-2383",
