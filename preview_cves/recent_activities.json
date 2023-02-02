@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-02T16:55:18.879Z",
-    "duration": "1488 msecs",
+    "timestamp": "2023-02-02T17:01:43.298Z",
+    "duration": "1447 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-02T16:25:18.034Z",
-      "endWindow": "2023-02-02T16:55:18.034Z",
+      "startWindow": "2023-02-02T16:31:42.558Z",
+      "endWindow": "2023-02-02T17:01:42.558Z",
       "count": 1,
       "cveIds": [
         "CVE-2022-46842"
