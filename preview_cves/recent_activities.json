@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-03T22:37:06.852Z",
-    "duration": "1216 msecs",
+    "timestamp": "2023-02-03T22:43:40.572Z",
+    "duration": "1545 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-03T22:07:06.162Z",
-      "endWindow": "2023-02-03T22:37:06.162Z",
+      "startWindow": "2023-02-03T22:13:39.748Z",
+      "endWindow": "2023-02-03T22:43:39.748Z",
       "count": 11,
       "cveIds": [
         "CVE-2022-33938",
