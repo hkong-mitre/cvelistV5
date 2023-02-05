@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-05T15:25:49.890Z",
-    "duration": "1263 msecs",
+    "timestamp": "2023-02-05T15:32:38.959Z",
+    "duration": "1367 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-05T14:55:49.283Z",
-      "endWindow": "2023-02-05T15:25:49.283Z",
+      "startWindow": "2023-02-05T15:02:38.158Z",
+      "endWindow": "2023-02-05T15:32:38.158Z",
       "count": 3,
       "cveIds": [
         "CVE-2017-11358",
