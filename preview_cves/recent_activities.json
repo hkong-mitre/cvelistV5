@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-06T21:29:52.009Z",
-    "duration": "1164 msecs",
+    "timestamp": "2023-02-06T21:37:54.800Z",
+    "duration": "1271 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-06T20:59:51.035Z",
-      "endWindow": "2023-02-06T21:29:51.035Z",
+      "startWindow": "2023-02-06T21:07:53.889Z",
+      "endWindow": "2023-02-06T21:37:53.889Z",
       "count": 6,
       "cveIds": [
         "CVE-2021-31573",
