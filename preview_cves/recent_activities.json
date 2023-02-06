@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-06T05:48:29.024Z",
-    "duration": "1093 msecs",
+    "timestamp": "2023-02-06T05:55:17.143Z",
+    "duration": "1668 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-06T05:18:28.414Z",
-      "endWindow": "2023-02-06T05:48:28.414Z",
+      "startWindow": "2023-02-06T05:25:16.034Z",
+      "endWindow": "2023-02-06T05:55:16.034Z",
       "count": 50,
       "cveIds": [
         "CVE-2022-38674",
