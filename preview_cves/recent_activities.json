@@ -1,16 +1,14 @@
 [
   {
-    "timestamp": "2023-02-06T13:58:55.618Z",
-    "duration": "1173 msecs",
+    "timestamp": "2023-02-06T14:28:11.498Z",
+    "duration": "1594 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-06T13:28:54.937Z",
-      "endWindow": "2023-02-06T13:58:54.938Z",
-      "count": 3,
+      "startWindow": "2023-02-06T13:58:10.685Z",
+      "endWindow": "2023-02-06T14:28:10.685Z",
+      "count": 1,
       "cveIds": [
-        "CVE-2022-44343",
-        "CVE-2022-48085",
-        "CVE-2022-48164"
+        "CVE-2023-0576"
       ]
     }
   }
