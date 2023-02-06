@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-06T15:54:09.272Z",
-    "duration": "1636 msecs",
+    "timestamp": "2023-02-06T16:00:39.432Z",
+    "duration": "1170 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-06T15:24:08.523Z",
-      "endWindow": "2023-02-06T15:54:08.523Z",
+      "startWindow": "2023-02-06T15:30:38.416Z",
+      "endWindow": "2023-02-06T16:00:38.416Z",
       "count": 1,
       "cveIds": [
         "CVE-2022-48078"
