@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-07T11:50:28.354Z",
-    "duration": "1195 msecs",
+    "timestamp": "2023-02-07T11:57:09.728Z",
+    "duration": "1257 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-07T11:20:27.718Z",
-      "endWindow": "2023-02-07T11:50:27.718Z",
+      "startWindow": "2023-02-07T11:27:08.944Z",
+      "endWindow": "2023-02-07T11:57:08.944Z",
       "count": 1,
       "cveIds": [
         "CVE-2015-10075"
