@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-07T17:54:08.821Z",
-    "duration": "1030 msecs",
+    "timestamp": "2023-02-07T18:00:20.554Z",
+    "duration": "1363 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-07T17:24:08.271Z",
-      "endWindow": "2023-02-07T17:54:08.271Z",
+      "startWindow": "2023-02-07T17:30:19.799Z",
+      "endWindow": "2023-02-07T18:00:19.799Z",
       "count": 1,
       "cveIds": [
         "CVE-2022-24990"
