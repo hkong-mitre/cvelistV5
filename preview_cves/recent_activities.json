@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-07T22:32:36.198Z",
-    "duration": "1814 msecs",
+    "timestamp": "2023-02-07T22:40:48.764Z",
+    "duration": "2042 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-07T22:02:35.263Z",
-      "endWindow": "2023-02-07T22:32:35.263Z",
+      "startWindow": "2023-02-07T22:10:48.107Z",
+      "endWindow": "2023-02-07T22:40:48.108Z",
       "count": 7,
       "cveIds": [
         "CVE-2021-36471",
