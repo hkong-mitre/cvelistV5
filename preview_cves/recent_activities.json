@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-07T10:32:26.172Z",
-    "duration": "1384 msecs",
+    "timestamp": "2023-02-07T10:41:53.986Z",
+    "duration": "1375 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-07T10:02:25.352Z",
-      "endWindow": "2023-02-07T10:32:25.352Z",
+      "startWindow": "2023-02-07T10:11:53.275Z",
+      "endWindow": "2023-02-07T10:41:53.275Z",
       "count": 1,
       "cveIds": [
         "CVE-2022-21948"
