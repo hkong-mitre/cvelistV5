@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-07T04:44:58.260Z",
-    "duration": "1427 msecs",
+    "timestamp": "2023-02-07T04:51:44.642Z",
+    "duration": "1158 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-07T04:14:57.431Z",
-      "endWindow": "2023-02-07T04:44:57.431Z",
+      "startWindow": "2023-02-07T04:21:43.980Z",
+      "endWindow": "2023-02-07T04:51:43.980Z",
       "count": 5,
       "cveIds": [
         "CVE-2022-27187",
