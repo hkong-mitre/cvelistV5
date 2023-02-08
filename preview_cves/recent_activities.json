@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-08T23:52:32.983Z",
-    "duration": "1425 msecs",
+    "timestamp": "2023-02-08T23:59:11.066Z",
+    "duration": "1055 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-08T23:22:32.143Z",
-      "endWindow": "2023-02-08T23:52:32.143Z",
+      "startWindow": "2023-02-08T23:29:10.331Z",
+      "endWindow": "2023-02-08T23:59:10.331Z",
       "count": 1,
       "cveIds": [
         "CVE-2023-25168"
