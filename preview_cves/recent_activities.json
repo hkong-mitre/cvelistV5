@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-08T07:41:44.196Z",
-    "duration": "1674 msecs",
+    "timestamp": "2023-02-08T07:48:55.613Z",
+    "duration": "1649 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-08T07:11:43.467Z",
-      "endWindow": "2023-02-08T07:41:43.467Z",
+      "startWindow": "2023-02-08T07:18:54.126Z",
+      "endWindow": "2023-02-08T07:48:54.126Z",
       "count": 1,
       "cveIds": [
         "CVE-2021-3958"
