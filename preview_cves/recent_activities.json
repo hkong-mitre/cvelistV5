@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-08T14:53:33.446Z",
-    "duration": "1376 msecs",
+    "timestamp": "2023-02-08T14:59:59.236Z",
+    "duration": "1822 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-08T14:23:32.743Z",
-      "endWindow": "2023-02-08T14:53:32.743Z",
+      "startWindow": "2023-02-08T14:29:58.715Z",
+      "endWindow": "2023-02-08T14:59:58.715Z",
       "count": 3,
       "cveIds": [
         "CVE-2022-45085",
