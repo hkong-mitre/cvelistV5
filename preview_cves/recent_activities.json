@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-08T21:59:22.267Z",
-    "duration": "1157 msecs",
+    "timestamp": "2023-02-08T22:32:06.878Z",
+    "duration": "1164 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-08T21:29:21.306Z",
-      "endWindow": "2023-02-08T21:59:21.306Z",
+      "startWindow": "2023-02-08T22:02:06.044Z",
+      "endWindow": "2023-02-08T22:32:06.044Z",
       "count": 0,
       "cveIds": []
     }
