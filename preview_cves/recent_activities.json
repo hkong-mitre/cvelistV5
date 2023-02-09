@@ -1,13 +1,15 @@
 [
   {
-    "timestamp": "2023-02-09T20:42:29.182Z",
-    "duration": "1832 msecs",
+    "timestamp": "2023-02-09T20:49:10.884Z",
+    "duration": "1402 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-09T20:12:28.425Z",
-      "endWindow": "2023-02-09T20:42:28.425Z",
-      "count": 0,
-      "cveIds": []
+      "startWindow": "2023-02-09T20:19:10.024Z",
+      "endWindow": "2023-02-09T20:49:10.024Z",
+      "count": 1,
+      "cveIds": [
+        "CVE-2023-23631"
+      ]
     }
   }
 ]
