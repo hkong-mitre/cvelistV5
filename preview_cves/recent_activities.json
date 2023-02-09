@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-09T08:49:12.862Z",
-    "duration": "1090 msecs",
+    "timestamp": "2023-02-09T08:55:45.858Z",
+    "duration": "1092 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-09T08:19:12.390Z",
-      "endWindow": "2023-02-09T08:49:12.390Z",
+      "startWindow": "2023-02-09T08:25:44.946Z",
+      "endWindow": "2023-02-09T08:55:44.946Z",
       "count": 1,
       "cveIds": [
         "CVE-2022-43440"
