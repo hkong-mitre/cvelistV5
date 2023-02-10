@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-10T03:41:42.557Z",
-    "duration": "1397 msecs",
+    "timestamp": "2023-02-10T03:50:42.850Z",
+    "duration": "1268 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-10T03:11:41.806Z",
-      "endWindow": "2023-02-10T03:41:41.806Z",
+      "startWindow": "2023-02-10T03:20:42.123Z",
+      "endWindow": "2023-02-10T03:50:42.123Z",
       "count": 1,
       "cveIds": [
         "CVE-2022-43501"
