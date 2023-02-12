@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-12T19:59:31.212Z",
-    "duration": "1517 msecs",
+    "timestamp": "2023-02-12T20:12:27.171Z",
+    "duration": "1365 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-12T19:29:30.396Z",
-      "endWindow": "2023-02-12T19:59:30.396Z",
+      "startWindow": "2023-02-12T19:42:26.547Z",
+      "endWindow": "2023-02-12T20:12:26.547Z",
       "count": 11,
       "cveIds": [
         "CVE-2009-3559",
