@@ -1,24 +1,14 @@
 [
   {
-    "timestamp": "2023-02-12T20:12:27.171Z",
-    "duration": "1365 msecs",
+    "timestamp": "2023-02-12T20:27:04.072Z",
+    "duration": "1173 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-12T19:42:26.547Z",
-      "endWindow": "2023-02-12T20:12:26.547Z",
-      "count": 11,
+      "startWindow": "2023-02-12T19:57:03.297Z",
+      "endWindow": "2023-02-12T20:27:03.297Z",
+      "count": 1,
       "cveIds": [
-        "CVE-2009-3559",
-        "CVE-2010-2532",
-        "CVE-2011-2906",
-        "CVE-2011-3640",
-        "CVE-2012-0039",
-        "CVE-2012-2128",
-        "CVE-2012-2657",
-        "CVE-2012-2658",
-        "CVE-2012-5613",
-        "CVE-2013-0346",
-        "CVE-2015-5215"
+        "CVE-2019-10143"
       ]
     }
   }
