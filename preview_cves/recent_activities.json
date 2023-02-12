@@ -1,14 +1,15 @@
 [
   {
-    "timestamp": "2023-02-12T20:27:04.072Z",
-    "duration": "1173 msecs",
+    "timestamp": "2023-02-12T20:33:26.435Z",
+    "duration": "1565 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-12T19:57:03.297Z",
-      "endWindow": "2023-02-12T20:27:03.297Z",
-      "count": 1,
+      "startWindow": "2023-02-12T20:03:25.770Z",
+      "endWindow": "2023-02-12T20:33:25.771Z",
+      "count": 2,
       "cveIds": [
-        "CVE-2019-10143"
+        "CVE-2019-10143",
+        "CVE-2020-36661"
       ]
     }
   }
