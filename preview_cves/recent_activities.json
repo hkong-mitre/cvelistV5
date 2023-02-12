@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-12T21:11:37.295Z",
-    "duration": "1289 msecs",
+    "timestamp": "2023-02-12T21:23:03.187Z",
+    "duration": "1693 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-12T20:41:36.610Z",
-      "endWindow": "2023-02-12T21:11:36.610Z",
+      "startWindow": "2023-02-12T20:53:02.181Z",
+      "endWindow": "2023-02-12T21:23:02.181Z",
       "count": 15,
       "cveIds": [
         "CVE-2002-2214",
