@@ -1,14 +1,13 @@
 [
   {
-    "timestamp": "2023-02-12T19:53:14.914Z",
-    "duration": "2149 msecs",
+    "timestamp": "2023-02-12T19:59:31.212Z",
+    "duration": "1517 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-12T19:23:13.877Z",
-      "endWindow": "2023-02-12T19:53:13.877Z",
-      "count": 12,
+      "startWindow": "2023-02-12T19:29:30.396Z",
+      "endWindow": "2023-02-12T19:59:30.396Z",
+      "count": 11,
       "cveIds": [
-        "CVE-2008-2956",
         "CVE-2009-3559",
         "CVE-2010-2532",
         "CVE-2011-2906",
