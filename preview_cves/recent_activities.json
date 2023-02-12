@@ -1,13 +1,15 @@
 [
   {
-    "timestamp": "2023-02-12T14:24:55.244Z",
-    "duration": "1424 msecs",
+    "timestamp": "2023-02-12T14:31:26.824Z",
+    "duration": "1385 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-12T13:54:53.891Z",
-      "endWindow": "2023-02-12T14:24:53.891Z",
-      "count": 0,
-      "cveIds": []
+      "startWindow": "2023-02-12T14:01:25.957Z",
+      "endWindow": "2023-02-12T14:31:25.957Z",
+      "count": 1,
+      "cveIds": [
+        "CVE-2019-25103"
+      ]
     }
   }
 ]
