@@ -1,13 +1,15 @@
 [
   {
-    "timestamp": "2023-02-12T06:34:20.817Z",
-    "duration": "1210 msecs",
+    "timestamp": "2023-02-12T06:43:54.327Z",
+    "duration": "1434 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-12T06:04:20.136Z",
-      "endWindow": "2023-02-12T06:34:20.136Z",
-      "count": 0,
-      "cveIds": []
+      "startWindow": "2023-02-12T06:13:53.674Z",
+      "endWindow": "2023-02-12T06:43:53.674Z",
+      "count": 1,
+      "cveIds": [
+        "CVE-2019-3892"
+      ]
     }
   }
 ]
