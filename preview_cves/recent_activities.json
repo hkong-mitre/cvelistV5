@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-12T05:55:07.415Z",
-    "duration": "1313 msecs",
+    "timestamp": "2023-02-12T06:01:28.597Z",
+    "duration": "1612 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-12T05:25:06.798Z",
-      "endWindow": "2023-02-12T05:55:06.798Z",
+      "startWindow": "2023-02-12T05:31:27.653Z",
+      "endWindow": "2023-02-12T06:01:27.653Z",
       "count": 54,
       "cveIds": [
         "CVE-2009-0786",
