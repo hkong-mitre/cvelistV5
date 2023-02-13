@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-13T11:08:41.928Z",
-    "duration": "1062 msecs",
+    "timestamp": "2023-02-13T11:22:43.046Z",
+    "duration": "990 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-13T10:38:41.306Z",
-      "endWindow": "2023-02-13T11:08:41.306Z",
+      "startWindow": "2023-02-13T10:52:42.463Z",
+      "endWindow": "2023-02-13T11:22:42.463Z",
       "count": 1,
       "cveIds": [
         "CVE-2023-0808"
