@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-13T14:43:30.672Z",
-    "duration": "1680 msecs",
+    "timestamp": "2023-02-13T14:49:32.788Z",
+    "duration": "1344 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-13T14:13:29.689Z",
-      "endWindow": "2023-02-13T14:43:29.689Z",
+      "startWindow": "2023-02-13T14:19:31.844Z",
+      "endWindow": "2023-02-13T14:49:31.844Z",
       "count": 49,
       "cveIds": [
         "CVE-2022-3891",
