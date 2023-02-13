@@ -30,8 +30,8 @@ jobs:
     environment: development
     runs-on: ubuntu-latest
     env:
-      CVE_SERVICES_URL: https://cveawg.mitre.org/api/cve
-      CVES_BASE_DIRECTORY: ./preview_cves
+      CVE_SERVICES_URL: ${{vars.CVE_SERVICES_URL}}
+      CVES_BASE_DIRECTORY: ${{vars.CVES_BASE_DIRECTORY}}
       CVE_API_ORG: ${{secrets.CVE_API_ORG}}
       CVE_API_USER: ${{secrets.CVE_API_USER}}
       CVE_API_KEY: ${{secrets.CVE_API_KEY}}
