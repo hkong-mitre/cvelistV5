@@ -1,19 +1,11 @@
 import { Cve } from './Cve.js';
+import { ApiService } from './ApiService.js';
 export interface CveApiOptions {
     id?: string;
     queryString?: string;
 }
-export declare class CveService {
-    /** url to CVE services */
-    _url: string;
-    /** default header when sending requests to CVE services */
-    headers: {
-        "Content-Type": string;
-        "CVE-API-ORG": string;
-        "CVE-API-USER": string;
-        "CVE-API-KEY": string;
-        redirect: string;
-    };
+export declare class CveService extends ApiService {
+    constructor();
     /** returns the CVE with id
      *
      */

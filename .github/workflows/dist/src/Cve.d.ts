@@ -20,6 +20,8 @@ export declare class Cve implements Cve5 {
      *  @returns string representing the partial path the cve belongs in (e.g., /1999/1xxx/CVE-1999-0001)
     */
     static toCvePath(cveId: string): string;
+    /** returns an array of CVE years represented as numbers [1999...2024] */
+    static getAllYears(): ReadonlyArray<number>;
     toCvePath(): string;
     toJsonString(prettyPrint?: boolean): string;
     readJsonFile(relFilepath: string): Cve;

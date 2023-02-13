@@ -4,6 +4,8 @@
  *  - release notes
  */
 import { Cve } from './Cve.js';
+import { Activity, ActivityOperation } from './core/ActivityLog.js';
+import { ActivityOptions, ActivityLog } from './core/ActivityLog.js';
 /** data structure returned from getFirstCvesFrame */
 export interface ModifiedCvesRequest {
     startWindow: string;
@@ -31,29 +33,14 @@ export interface ModifiedCvesResponse {
 }
 export declare const kActivity_UpdateByModificationDateWindow = "UPDATE_BY_MODIFICATION_DATE_WINDOW";
 export declare const kActivity_UpdateByPage = "UPDATE_BY_PAGE";
-export interface RecentActivity {
-    timestamp: string;
-    duration: string;
-    activity: string;
-    summary: {
-        startWindow?: string;
-        endWindow?: string;
-        page?: number;
-        count: number;
-        cveIds: string[];
-    };
-}
 export declare class CveUpdater {
     /** repository base path */
     _repository_base: string;
     _release_note_path: string;
     _recent_activities_path: string;
-    _previous_activities: RecentActivity[];
-    constructor(activity: string);
+    _activityLog: ActivityLog;
+    constructor(activity: string, logOptions: ActivityOptions);
     /** writes to activity file */
-    static writeActivityFile(relFilepath: string, body: string): void;
-    /** gets the current timestamp  */
-    timestamp(humanReadable?: boolean): string;
     /** retrieves the CVEs in a window of time
      *  @param startWindow requested start window, MUST BE ISO
      *  @param endWindow requested end window, MUST BE ISO
@@ -66,7 +53,7 @@ export declare class CveUpdater {
      *  @todo NOTE that there is a known bug at present, where if there were > max records that were changed in less than 1 second
      *  this will go into an endless loop
     */
-    getFirstCvesFrame(startWindow: string, endWindow: string, max?: number, writeDir?: string): Promise<RecentActivity>;
+    getFirstCvesFrame(startWindow: string, endWindow: string, max?: number, writeDir?: string): Promise<ActivityOperation>;
     /** retrieves the CVEs in a window of time
      *  @param startWindow requested start window, MUST BE ISO
      *  @param endWindow requested end window, MUST BE ISO
@@ -76,17 +63,15 @@ export declare class CveUpdater {
      *  @returns an Activity with data and properties OR
      *           null if params are detected to be a no-op
     */
-    getCvesInWindow(startWindow: string, endWindow: string, max?: number, writeDir?: string): Promise<RecentActivity[]>;
+    getCvesInWindow(startWindow: string, endWindow: string, max?: number, writeDir?: string): Promise<ActivityOperation[]>;
     /** retrieves all CVEs by page
      *  @param page requested page number
      *  @returns an Activity with data and properties OR
      *           null if params are detected to be a no-op
     */
-    getCvesByPage(page: number, writeDir?: string): Promise<RecentActivity>;
+    getCvesByPage(page: number, writeDir?: string): Promise<ActivityOperation>;
     /** reads recent activities data */
-    readRecentActivities(): RecentActivity[];
-    /** write recent activities to file
-     *  @param clear optional boolean to clear the recent_activities.json file before writing
-     */
-    writeRecentActivities(clear?: boolean): void;
+    readRecentActivities(): Activity[];
+    /** write recent activities to file */
+    writeRecentActivities(): void;
 }
