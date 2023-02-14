@@ -41,7 +41,7 @@ jobs:
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
           git pull
-          node ./.github/workflows/dist/index.js update '${{ github.event.inputs.params }}'
+          node ./.github/workflows/dist/index.js update ${{ github.event.inputs.params }}
           git config user.email "github_action@example.com"
           git config user.name "Github Action"
           git add preview_cves
