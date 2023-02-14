@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-14T21:22:29.072Z",
-    "duration": "2007 msecs",
+    "timestamp": "2023-02-14T21:30:46.204Z",
+    "duration": "1903 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-14T20:22:28.271Z",
-      "endWindow": "2023-02-14T21:22:28.271Z",
+      "startWindow": "2023-02-14T20:30:45.092Z",
+      "endWindow": "2023-02-14T21:30:45.092Z",
       "count": 83,
       "cveIds": [
         "CVE-2022-39253",
