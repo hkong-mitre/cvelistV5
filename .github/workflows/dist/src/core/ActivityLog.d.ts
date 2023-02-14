@@ -39,7 +39,7 @@ export interface ActivityOptions {
     filename?: string;
     mode?: "prepend" | "append";
     logAlways?: boolean;
-    clearHistoryFirst?: boolean;
+    logKeepPrevious?: boolean;
 }
 export declare class ActivityLog {
     _options: ActivityOptions;

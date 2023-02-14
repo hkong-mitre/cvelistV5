@@ -30799,14 +30799,16 @@ class ActivityLog {
         this._options.filename = options.filename || `activities_recent.json`;
         // this._options.mode = options.mode || `prepend`;
         this._options.logAlways = options.logAlways || false;
-        this._options.clearHistoryFirst = options.clearHistoryFirst || false;
+        this._options.logKeepPrevious = options.logKeepPrevious || false;
         this._fullpath = `${this._options.path}/${this._options.filename}`;
-        if (this._options.clearHistoryFirst) {
-            external_fs_default().unlinkSync(this._fullpath);
+        // console.log(`options=`, this._options);
+        if (this._options.logKeepPrevious) {
+            this._activities = ActivityLog.readFile(this._fullpath);
+        }
+        else {
+            // fs.unlinkSync(this._fullpath);
             this.clearActivities();
         }
-        // console.log(`options=`, this._options);
-        this._activities = ActivityLog.readFile(this._fullpath);
     }
     // clears the file
     clearActivities() {
@@ -31174,7 +31176,7 @@ class RebuildCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .
         const updater = new _CveUpdater_js__WEBPACK_IMPORTED_MODULE_1__/* .CveUpdater */ .pL(`rebuild command`, {
             path: options.output,
             filename: `recent_activities.json`,
-            clearHistoryFirst: true
+            logKeepPrevious: false
         });
         let resp;
         if (options.onlyPage) {
@@ -31211,6 +31213,8 @@ class RebuildCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .
 /* harmony import */ var _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(248);
 /* harmony import */ var _CveService_js__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(4086);
 /* harmony import */ var _CveUpdater_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2970);
+/* harmony import */ var _DateCommand_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(3537);
+
 
 
 
@@ -31219,11 +31223,11 @@ class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .G
     constructor(program) {
         super('update', program);
         const timestamp = new Date();
-        const defaultMins = 15;
+        const defaultMins = parseInt(process.env.CVES_DEFAULT_UPDATE_LOOKBACK_IN_MINS || "60");
         this._program.command('update')
             .description('incremental update using CVE Services')
             .option('--log-always', 'write logs even if no net changes', false)
-            // .option('--log-clear', 'clears the log before writing to it', false)
+            .option('--log-keep-previous', 'keeps previous run instead of clearing it first', false)
             .option('--logfile <string>', 'activies log filename', `recent_activities.json`)
             .option('--output <string>', 'output directory', process.env.CVES_BASE_DIRECTORY)
             .option('--start <ISO string>', `start window, defaults to now - ${defaultMins} minutes`, date_fns_sub__WEBPACK_IMPORTED_MODULE_3___default()(timestamp, { minutes: defaultMins }).toISOString())
@@ -31234,7 +31238,8 @@ class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .G
     }
     async run(options) {
         super.prerun(options);
-        const a = super.timerReset();
+        super.timerReset();
+        console.log(`cveUtils started at ${_DateCommand_js__WEBPACK_IMPORTED_MODULE_4__/* .DateCommand.getIsoDate */ .d.getIsoDate()}`);
         const cveService = new _CveService_js__WEBPACK_IMPORTED_MODULE_0__/* .CveService */ .o();
         // const activitiesFilePath = `${options.output}/recent_activities.json`;
         // ActivityLog.writeFile(activitiesFilePath, `[]`);
@@ -31250,7 +31255,7 @@ class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .G
         console.log(`count=${countResp.totalCount}`);
         const cves = await updater.getCvesInWindow(options.start, options.stop, 500, `${process.env.CVES_BASE_DIRECTORY}`);
         console.log(`cves=`, JSON.stringify(cves, null, 2));
-        console.log(`opertion completed in ${super.timerSinceStart() / 1000} seconds`);
+        console.log(`opertion completed in ${super.timerSinceStart() / 1000} seconds at ${_DateCommand_js__WEBPACK_IMPORTED_MODULE_4__/* .DateCommand.getIsoDate */ .d.getIsoDate()}`);
         super.postrun(options);
     }
 }
