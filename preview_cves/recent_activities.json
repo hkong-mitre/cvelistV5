@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-14T19:21:03.923Z",
-    "duration": "1056 msecs",
+    "timestamp": "2023-02-14T19:28:05.693Z",
+    "duration": "1532 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-14T18:21:02.889Z",
-      "endWindow": "2023-02-14T19:21:02.889Z",
+      "startWindow": "2023-02-14T18:28:04.778Z",
+      "endWindow": "2023-02-14T19:28:04.778Z",
       "count": 3,
       "cveIds": [
         "CVE-2021-39296",
