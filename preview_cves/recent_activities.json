@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-14T05:56:05.336Z",
-    "duration": "1396 msecs",
+    "timestamp": "2023-02-14T06:02:02.203Z",
+    "duration": "2192 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-14T04:56:04.679Z",
-      "endWindow": "2023-02-14T05:56:04.679Z",
+      "startWindow": "2023-02-14T05:02:01.259Z",
+      "endWindow": "2023-02-14T06:02:01.259Z",
       "count": 2,
       "cveIds": [
         "CVE-2022-43469",
