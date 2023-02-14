@@ -15,16 +15,10 @@ on:
         description: 'Log level'
         required: false
         default: 'debug'
-      startTime:
-        description: 'start time of window to fetch CVEs'
+      params:
+        description: 'command line arguments to update'
         required: false
-      stopTime:
-        description: 'stop time of window to fetch CVEs'
-        required: false
-      commitMessage:
-        description: 'git commit message'
-        required: false
-        default: '[MANUAL RUN] request window is [xxx,yyy]'
+        default: ''
 jobs:
   update-cves:
     environment: development
@@ -47,7 +41,7 @@ jobs:
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
           git pull
-          node ./.github/workflows/dist/index.js update
+          node ./.github/workflows/dist/index.js update '${{ github.event.inputs.params }}'
           git config user.email "github_action@example.com"
           git config user.name "Github Action"
           git add preview_cves
