@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-14T10:54:57.762Z",
-    "duration": "1552 msecs",
+    "timestamp": "2023-02-14T11:01:34.012Z",
+    "duration": "1370 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-14T09:54:56.894Z",
-      "endWindow": "2023-02-14T10:54:56.894Z",
+      "startWindow": "2023-02-14T10:01:32.840Z",
+      "endWindow": "2023-02-14T11:01:32.840Z",
       "count": 57,
       "cveIds": [
         "CVE-2019-19300",
