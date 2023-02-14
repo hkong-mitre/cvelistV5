@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-14T15:43:35.092Z",
-    "duration": "1480 msecs",
+    "timestamp": "2023-02-14T15:51:47.816Z",
+    "duration": "1632 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-14T14:43:34.390Z",
-      "endWindow": "2023-02-14T15:43:34.390Z",
+      "startWindow": "2023-02-14T14:51:46.764Z",
+      "endWindow": "2023-02-14T15:51:46.764Z",
       "count": 6,
       "cveIds": [
         "CVE-2021-46023",
