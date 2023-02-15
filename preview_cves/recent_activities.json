@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-15T21:58:09.719Z",
-    "duration": "1373 msecs",
+    "timestamp": "2023-02-15T22:10:37.962Z",
+    "duration": "1766 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-15T20:58:09.006Z",
-      "endWindow": "2023-02-15T21:58:09.006Z",
+      "startWindow": "2023-02-15T21:10:37.004Z",
+      "endWindow": "2023-02-15T22:10:37.004Z",
       "count": 20,
       "cveIds": [
         "CVE-2020-19825",
