@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-15T05:03:47.582Z",
-    "duration": "1075 msecs",
+    "timestamp": "2023-02-15T05:19:30.979Z",
+    "duration": "990 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-15T04:03:47.113Z",
-      "endWindow": "2023-02-15T05:03:47.113Z",
+      "startWindow": "2023-02-15T04:19:30.444Z",
+      "endWindow": "2023-02-15T05:19:30.444Z",
       "count": 1,
       "cveIds": [
         "CVE-2022-25978"
