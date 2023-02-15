@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-15T23:31:22.882Z",
-    "duration": "1329 msecs",
+    "timestamp": "2023-02-15T23:38:50.142Z",
+    "duration": "1319 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-15T22:31:22.029Z",
-      "endWindow": "2023-02-15T23:31:22.029Z",
+      "startWindow": "2023-02-15T22:38:49.182Z",
+      "endWindow": "2023-02-15T23:38:49.182Z",
       "count": 1,
       "cveIds": [
         "CVE-2022-37783"
