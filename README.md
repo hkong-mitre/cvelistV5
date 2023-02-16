@@ -1,7 +1,5 @@
 # cvelistV5
 
-> MAY CONTAIN SYNTHETIC TEST DATA --- DO NOT USE AS REFERENCE FOR CVEs
-> 
 > Work In Progress - use for notional workflow and integration only until the public preview release
 
 This repository is a JSON 5.0 view of the official CVE List. It is a work in progress. 
