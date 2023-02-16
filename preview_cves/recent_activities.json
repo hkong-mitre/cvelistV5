@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-16T17:46:27.980Z",
-    "duration": "1733 msecs",
+    "timestamp": "2023-02-16T17:52:34.912Z",
+    "duration": "1588 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-16T16:46:27.091Z",
-      "endWindow": "2023-02-16T17:46:27.091Z",
+      "startWindow": "2023-02-16T16:52:34.255Z",
+      "endWindow": "2023-02-16T17:52:34.255Z",
       "count": 6,
       "cveIds": [
         "CVE-2023-23936",
