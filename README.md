@@ -4,7 +4,7 @@
 
 This repository is a JSON 5.0 view of the official CVE List. It is a work in progress. 
 - `preview_cves` directory contains all of the CVEs from the official CVE Services API.
-- `review_set` directory is deprecated and will be removed at the public preview release.  It contains old data from October 2022, and is only used for testing purposes.
+- `review_set` directory has been removed.  It contained old data from October 2022, and wass only used for testing purposes.
 
 Until CVE Services "Hard Deploy" (targeted for 1st QT, 2023) is completed, the official published CVE List can be found at the following locations.
 
