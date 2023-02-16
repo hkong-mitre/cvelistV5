@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-16T03:12:52.000Z",
-    "duration": "1580 msecs",
+    "timestamp": "2023-02-16T03:31:29.518Z",
+    "duration": "1504 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-16T02:12:51.177Z",
-      "endWindow": "2023-02-16T03:12:51.177Z",
+      "startWindow": "2023-02-16T02:31:28.728Z",
+      "endWindow": "2023-02-16T03:31:28.728Z",
       "count": 14,
       "cveIds": [
         "CVE-2022-21594",
