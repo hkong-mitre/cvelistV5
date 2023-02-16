@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-16T06:37:04.984Z",
-    "duration": "1043 msecs",
+    "timestamp": "2023-02-16T06:48:14.909Z",
+    "duration": "1533 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-16T05:37:04.382Z",
-      "endWindow": "2023-02-16T06:37:04.382Z",
+      "startWindow": "2023-02-16T05:48:14.078Z",
+      "endWindow": "2023-02-16T06:48:14.078Z",
       "count": 3,
       "cveIds": [
         "CVE-2023-0567",
