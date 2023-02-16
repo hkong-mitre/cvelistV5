@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-16T21:51:47.719Z",
-    "duration": "1405 msecs",
+    "timestamp": "2023-02-16T21:58:37.626Z",
+    "duration": "1519 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-16T20:51:46.951Z",
-      "endWindow": "2023-02-16T21:51:46.951Z",
+      "startWindow": "2023-02-16T20:58:36.709Z",
+      "endWindow": "2023-02-16T21:58:36.709Z",
       "count": 14,
       "cveIds": [
         "CVE-2012-3287",
