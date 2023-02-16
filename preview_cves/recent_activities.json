@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-16T19:43:11.791Z",
-    "duration": "1454 msecs",
+    "timestamp": "2023-02-16T19:49:32.184Z",
+    "duration": "1633 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-16T18:43:10.920Z",
-      "endWindow": "2023-02-16T19:43:10.920Z",
+      "startWindow": "2023-02-16T18:49:31.694Z",
+      "endWindow": "2023-02-16T19:49:31.694Z",
       "count": 2,
       "cveIds": [
         "CVE-2022-40080",
