@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-17T06:22:05.499Z",
-    "duration": "1289 msecs",
+    "timestamp": "2023-02-17T06:37:55.326Z",
+    "duration": "1018 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-17T05:22:04.955Z",
-      "endWindow": "2023-02-17T06:22:04.955Z",
+      "startWindow": "2023-02-17T05:37:54.441Z",
+      "endWindow": "2023-02-17T06:37:54.441Z",
       "count": 3,
       "cveIds": [
         "CVE-2020-36643",
