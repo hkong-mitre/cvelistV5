@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-17T18:46:12.731Z",
-    "duration": "1266 msecs",
+    "timestamp": "2023-02-17T18:53:01.073Z",
+    "duration": "1605 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-17T17:46:11.927Z",
-      "endWindow": "2023-02-17T18:46:11.927Z",
+      "startWindow": "2023-02-17T17:53:00.133Z",
+      "endWindow": "2023-02-17T18:53:00.133Z",
       "count": 6,
       "cveIds": [
         "CVE-2022-34351",
