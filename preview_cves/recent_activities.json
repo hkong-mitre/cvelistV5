@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-18T18:16:54.193Z",
-    "duration": "1132 msecs",
+    "timestamp": "2023-02-18T18:32:41.368Z",
+    "duration": "1828 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-18T17:16:53.278Z",
-      "endWindow": "2023-02-18T18:16:53.278Z",
+      "startWindow": "2023-02-18T17:32:40.554Z",
+      "endWindow": "2023-02-18T18:32:40.554Z",
       "count": 2,
       "cveIds": [
         "CVE-2019-16884",
