@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-19T03:15:31.862Z",
-    "duration": "1821 msecs",
+    "timestamp": "2023-02-19T03:32:12.941Z",
+    "duration": "1033 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-19T02:15:30.932Z",
-      "endWindow": "2023-02-19T03:15:30.932Z",
+      "startWindow": "2023-02-19T02:32:12.275Z",
+      "endWindow": "2023-02-19T03:32:12.275Z",
       "count": 10,
       "cveIds": [
         "CVE-2020-3299",
