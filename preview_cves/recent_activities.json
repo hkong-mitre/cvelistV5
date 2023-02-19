@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-19T18:16:00.501Z",
-    "duration": "1482 msecs",
+    "timestamp": "2023-02-19T18:32:04.646Z",
+    "duration": "1445 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-19T17:15:59.545Z",
-      "endWindow": "2023-02-19T18:15:59.545Z",
+      "startWindow": "2023-02-19T17:32:03.470Z",
+      "endWindow": "2023-02-19T18:32:03.470Z",
       "count": 1,
       "cveIds": [
         "CVE-2016-15024"
