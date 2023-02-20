@@ -1,11 +1,11 @@
 [
   {
-    "timestamp": "2023-02-20T06:35:55.605Z",
-    "duration": "1174 msecs",
+    "timestamp": "2023-02-20T06:46:54.541Z",
+    "duration": "1974 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
     "summary": {
-      "startWindow": "2023-02-20T05:35:54.676Z",
-      "endWindow": "2023-02-20T06:35:54.676Z",
+      "startWindow": "2023-02-20T05:46:53.578Z",
+      "endWindow": "2023-02-20T06:46:53.578Z",
       "count": 2,
       "cveIds": [
         "CVE-2012-10008",
