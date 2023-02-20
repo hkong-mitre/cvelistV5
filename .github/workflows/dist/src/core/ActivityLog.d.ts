@@ -37,7 +37,7 @@ export interface Activity extends ActivityOperation {
 export interface ActivityOptions {
     path?: string;
     filename?: string;
-    mode?: "prepend" | "append";
+    logCurrentActivity?: boolean;
     logAlways?: boolean;
     logKeepPrevious?: boolean;
 }
