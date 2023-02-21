@@ -41,6 +41,7 @@ jobs:
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
+          git fetch --tags
           git pull
           node ./.github/workflows/dist/index.js update ${{ github.event.inputs.params }}
           git status
