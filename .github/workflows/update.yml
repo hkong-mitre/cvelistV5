@@ -35,13 +35,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: update log
         # run: echo "out=$(date '+%Y-%m-%d_%H%M_UTC')" >> $GITHUB_OUTPUT
         run: |
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           echo $TEMP_TIMESTAMP >> update_log.md
-          git fetch --tags
+          git config (--global) remote.origin.tagopt --tags
           git pull
           node ./.github/workflows/dist/index.js update ${{ github.event.inputs.params }}
           git status
