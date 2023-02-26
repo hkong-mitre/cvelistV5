@@ -1,5 +1,18 @@
 [
   {
+    "timestamp": "2023-02-26T05:45:49.264Z",
+    "duration": "1410 msecs",
+    "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
+    "summary": {
+      "startWindow": "2023-02-26T02:45:48.458Z",
+      "endWindow": "2023-02-26T05:45:48.452Z",
+      "count": 1,
+      "cveIds": [
+        "CVE-2023-26091"
+      ]
+    }
+  },
+  {
     "timestamp": "2023-02-26T05:39:18.882Z",
     "duration": "1236 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
