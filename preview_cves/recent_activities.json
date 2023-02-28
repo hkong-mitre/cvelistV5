@@ -1,5 +1,21 @@
 [
   {
+    "timestamp": "2023-02-28T07:01:06.862Z",
+    "duration": "1369 msecs",
+    "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
+    "summary": {
+      "startWindow": "2023-02-28T04:01:05.596Z",
+      "endWindow": "2023-02-28T07:01:05.587Z",
+      "count": 4,
+      "cveIds": [
+        "CVE-2021-22283",
+        "CVE-2022-44666",
+        "CVE-2023-22995",
+        "CVE-2023-26105"
+      ]
+    }
+  },
+  {
     "timestamp": "2023-02-28T06:54:33.486Z",
     "duration": "1290 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
