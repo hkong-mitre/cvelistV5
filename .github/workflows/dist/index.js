@@ -64368,7 +64368,7 @@ class CveService extends ApiService {
 
 /***/ }),
 
-/***/ 12970:
+/***/ 58786:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -64381,80 +64381,69 @@ __nccwpck_require__.d(__webpack_exports__, {
 
 // EXTERNAL MODULE: ./src/Cve.ts
 var Cve = __nccwpck_require__(99081);
-// EXTERNAL MODULE: ./src/CveService.ts + 1 modules
-var CveService = __nccwpck_require__(24086);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(57147);
-var external_fs_default = /*#__PURE__*/__nccwpck_require__.n(external_fs_);
-// EXTERNAL MODULE: external "path"
-var external_path_ = __nccwpck_require__(71017);
-var external_path_default = /*#__PURE__*/__nccwpck_require__.n(external_path_);
-;// CONCATENATED MODULE: ./src/core/ActivityLog.ts
+// EXTERNAL MODULE: ./node_modules/lodash/lodash.js
+var lodash = __nccwpck_require__(90250);
+// EXTERNAL MODULE: ./src/commands/DateCommand.ts
+var DateCommand = __nccwpck_require__(63537);
+;// CONCATENATED MODULE: ./src/core/Activity.ts
 /**
- *  Activity logs
+ *  Activity object
+ *  This is the main object in an ActivityLog file
  */
 
 
-class ActivityLog {
-    _options;
-    _fullpath;
-    _activities = [];
-    constructor(options) {
-        this._options = options;
-        this._options.path = options.path || `.`;
-        this._options.filename = options.filename || `./test/activities_recent.json`;
-        // this._options.mode = options.mode || `prepend`;
-        this._options.logAlways = options.logAlways || false;
-        this._options.logKeepPrevious = options.logKeepPrevious || false;
-        this._fullpath = `${this._options.path}/${this._options.filename}`;
-        // console.log(`options=`, this._options);
-        if (this._options.logKeepPrevious) {
-            this._activities = ActivityLog.readFile(this._fullpath);
-        }
-        else {
-            // fs.unlinkSync(this._fullpath);
-            this.clearActivities();
-        }
-    }
-    // clears the file
-    clearActivities() {
-        this._activities = [];
-    }
-    // prepends activity to activities
-    prepend(activity) {
-        // console.log(`options=`, this._options);
-        if (this._options.logAlways || activity.summary.count > 0) {
-            this._activities.unshift(activity);
-        }
-        return this._activities;
-    }
-    // ----- IO ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
-    // write activities to a file
-    writeRecentFile() {
-        // console.log(`options=`, this._options);
-        if (this._options.logAlways || this._activities.length > 0) {
-            ActivityLog.writeFile(this._fullpath, JSON.stringify(this._activities, null, 2));
+var ActivityStatus;
+(function (ActivityStatus) {
+    ActivityStatus["Unknown"] = "unknown";
+    ActivityStatus["NoStarted"] = "not_started";
+    ActivityStatus["InProgress"] = "in_progress";
+    ActivityStatus["Completed"] = "completed";
+    ActivityStatus["Failed"] = "failed";
+})(ActivityStatus = ActivityStatus || (ActivityStatus = {}));
+class Activity {
+    startTime = DateCommand/* DateCommand.getIsoDate */.d.getIsoDate();
+    stopTime = "?";
+    duration = "?";
+    // type: `github` | `manual`,
+    name = "?";
+    url = "?"; // optional URL to github action, none for manual
+    status;
+    errors;
+    notes;
+    delta;
+    steps;
+    constructor(props = null) {
+        // set defaults first
+        // update with props
+        if (props) {
+            this.startTime = props?.startTime;
+            this.stopTime = props?.stopTime;
+            this.duration = props?.duration;
+            this.name = props?.name;
+            this.url = props?.url;
+            this.status = props?.status;
+            this.errors = props?.errors ? (0,lodash.cloneDeep)(props.errors) : [];
+            this.notes = props?.notes ? (0,lodash.cloneDeep)(props.notes) : {};
+            this.delta = props?.delta ? (0,lodash.cloneDeep)(props.delta) : { newCves: [], updatedCves: [] };
+            this.steps = props?.steps ? (0,lodash.cloneDeep)(props.steps) : [];
         }
     }
-    // static functions ----- ----- ----- ----- ----- ----- ----- ----- ----- 
-    /** reads in the recent activities into _activities */
-    static readFile(relFilepath) {
-        if (external_fs_default().existsSync(relFilepath)) {
-            const str = external_fs_default().readFileSync(relFilepath, { encoding: 'utf8', flag: 'r' });
-            return JSON.parse(str);
-        }
-        else {
-            return [];
-        }
+    equalTo(props) {
+        return (0,lodash.isEqual)(this, props);
     }
-    /** writes to activity file */
-    static writeFile(relFilepath, body) {
-        const dirname = external_path_default().dirname(relFilepath);
-        external_fs_default().mkdirSync(dirname, { recursive: true });
-        external_fs_default().writeFileSync(`${relFilepath}`, body);
+    // prepends a step to steps
+    prependStep(step) {
+        if (step?.summary?.count > 0) {
+            this.steps.unshift(step);
+        }
+        return this.steps;
     }
 }
 
+// EXTERNAL MODULE: ./src/CveService.ts + 1 modules
+var CveService = __nccwpck_require__(24086);
+// EXTERNAL MODULE: ./src/core/ActivityLog.ts
+var ActivityLog = __nccwpck_require__(51474);
 // EXTERNAL MODULE: ./node_modules/date-fns/index.js
 var date_fns = __nccwpck_require__(73314);
 ;// CONCATENATED MODULE: ./src/CveUpdater.ts
@@ -64467,6 +64456,7 @@ var date_fns = __nccwpck_require__(73314);
 
 
 
+
 const kActivity_UpdateByModificationDateWindow = 'UPDATE_BY_MODIFICATION_DATE_WINDOW';
 const kActivity_UpdateByPage = 'UPDATE_BY_PAGE';
 class CveUpdater {
@@ -64474,12 +64464,9 @@ class CveUpdater {
     _repository_base = `${process.env.CVES_BASE_DIRECTORY}`;
     _release_note_path = `${this._repository_base}/release_notes.md`;
     _recent_activities_path = `${this._repository_base}/recent_activities.json`;
-    // _previous_activities: ActivityOperation[] = [];
     _activityLog;
-    // current activity
-    // _log: ActivityOperation = null;
     constructor(activity, logOptions) {
-        this._activityLog = new ActivityLog(logOptions);
+        this._activityLog = new ActivityLog/* ActivityLog */.D(logOptions);
     }
     // ----- 
     /** writes to activity file */
@@ -64539,11 +64526,30 @@ class CveUpdater {
         });
         // const totalCount = cves.cveRecords.length;
         // console.log(`json=`, JSON.stringify(cves.cveRecords[0]));
+        const startTime = new Date(timestampStart).toISOString();
         const timestampEnd = Date.now();
-        const activity = {
-            timestamp: new Date(timestampStart).toISOString(),
+        // const activity: Activity = new Activity({
+        //   startTime,
+        //   stopTime: "",
+        //   duration: `${timestampEnd - timestampStart} msecs`,
+        //   // type: `github`,
+        //   name: `cves update`,
+        //   url: `test`,
+        //   status: ActivityStatus.Completed,
+        //   errors: [],
+        //   notes: {},
+        //   delta: {
+        //     newCves: [],
+        //     updatedCves: []
+        //   },
+        //   steps: [],
+        //   operation: null
+        // });
+        const step = {
+            startTime,
+            stopTime: new Date(timestampEnd).toISOString(),
             duration: `${timestampEnd - timestampStart} msecs`,
-            activity: kActivity_UpdateByModificationDateWindow,
+            stepDescription: kActivity_UpdateByModificationDateWindow,
             summary: {
                 startWindow: actualStartWindow,
                 endWindow: actualEndWindow,
@@ -64552,8 +64558,8 @@ class CveUpdater {
             }
         };
         // const currentActivities = [activity]
-        this._activityLog.prepend(activity);
-        this._activityLog.writeRecentFile();
+        // this._activityLog.prepend(activity);
+        // this._activityLog.writeRecentFile();
         // write file to repository
         if (writeDir) {
             cves.cveRecords.forEach(json => {
@@ -64561,7 +64567,7 @@ class CveUpdater {
                 cve.writeToCvePath(writeDir);
             });
         }
-        return activity;
+        return step;
     }
     /** retrieves the CVEs in a window of time
      *  @param startWindow requested start window, MUST BE ISO
@@ -64573,19 +64579,45 @@ class CveUpdater {
      *           null if params are detected to be a no-op
     */
     async getCvesInWindow(startWindow, endWindow, max = 500, writeDir = undefined) {
+        const timestampStart = Date.now();
+        // ActivityLog
+        const startTime = new Date(timestampStart).toISOString();
+        const timestampEnd = Date.now();
+        const activity = new Activity({
+            startTime,
+            stopTime: "tbd",
+            duration: `tbd`,
+            // type: `github`,
+            name: `cves in window`,
+            url: `tbd`,
+            status: ActivityStatus.Completed,
+            errors: [{ "tbd": "tbd" }],
+            notes: {
+            // "function": "getCvesInWindow()",
+            // "params": JSON.stringify({ startWindow, endWindow, max, writeDir }, null, 2)
+            },
+            delta: {
+                newCves: [],
+                updatedCves: []
+            },
+            steps: []
+        });
+        // do window
         let newStartWindow = startWindow;
         let newEndWindow = endWindow;
-        let activities = [];
-        let activity;
+        // let activities = [];
+        let step;
         do {
-            activity = await this.getFirstCvesFrame(newStartWindow, newEndWindow, max, `${process.env.CVES_BASE_DIRECTORY}`);
-            if (activity) {
+            step = await this.getFirstCvesFrame(newStartWindow, newEndWindow, max, `${process.env.CVES_BASE_DIRECTORY}`);
+            if (step) {
                 // count = activity.summary.count;
-                newStartWindow = activity.summary.endWindow;
-                activities.unshift(activity);
+                // xxxxx
+                newStartWindow = step?.summary?.endWindow;
+                activity.prependStep(step);
+                console.log(`getCvesInWindow.step.summary.count=${step.summary.count}`);
             }
-        } while (activity && newStartWindow < newEndWindow);
-        return activities;
+        } while (step && newStartWindow < newEndWindow);
+        return activity;
     }
     /** retrieves all CVEs by page
      *  @param page requested page number
@@ -64597,6 +64629,7 @@ class CveUpdater {
         const service = new CveService/* CveService */.o();
         const queryString = `page=${page}`;
         const cves = await service.cve({ queryString });
+        // console.log(`getCvesByPage().cves=${JSON.stringify(cves, null, 2)}`);
         const cveIds = [];
         cves.cveRecords.forEach(record => {
             cveIds.push(record.cveMetadata.cveId);
@@ -64605,18 +64638,40 @@ class CveUpdater {
         const itemsThisPage = cves.cveRecords.length;
         // const totalCount = cves.cveRecords.length;
         // console.log(`json=`, JSON.stringify(cves.cveRecords[0]));
+        const startTime = new Date(timestampStart).toISOString();
         const timestampEnd = Date.now();
-        const activity = {
-            timestamp: new Date(timestampStart).toISOString(),
+        const activity = new Activity({
+            startTime,
+            stopTime: "",
             duration: `${timestampEnd - timestampStart} msecs`,
-            activity: kActivity_UpdateByModificationDateWindow,
+            // type: `github`,
+            name: `cves rebuild`,
+            url: ``,
+            status: ActivityStatus.Completed,
+            errors: [],
+            notes: {
+            // "function": "getCvesInWindow()",
+            // "params": JSON.stringify({ page, writeDir }, null, 2)
+            },
+            delta: {
+                newCves: [],
+                updatedCves: []
+            },
+            steps: []
+        });
+        const step = {
+            startTime,
+            stopTime: new Date(timestampEnd).toISOString(),
+            duration: `${timestampEnd - timestampStart} msecs`,
+            stepDescription: kActivity_UpdateByModificationDateWindow,
             summary: {
                 page,
                 count: cves.cveRecords.length,
                 cveIds,
             }
         };
-        console.log(`${new Date(timestampStart).toISOString()}  (${timestampEnd - timestampStart} msecs)  page=${page}:  itemsThisPage=${itemsThisPage} / ${totalCount}`);
+        activity.prependStep(step);
+        console.log(`${new Date(timestampStart).toISOString()}  (${timestampEnd - timestampStart} msecs) page = ${page}: itemsThisPage = ${itemsThisPage} / ${totalCount}`);
         // const currentActivities = [activity]
         this._activityLog.prepend(activity);
         this._activityLog.writeRecentFile();
@@ -64714,7 +64769,7 @@ class GenericCommand {
         this.timerReset();
     }
     static getUtilityVersion() {
-        return `${process.env.CVE_UTILS_VERSION}`;
+        return `0.2023-03-01-alpha`;
     }
     // timer functions
     //  @todo move to utils/timer.ts
@@ -64749,70 +64804,185 @@ class GenericCommand {
 
 /***/ }),
 
-/***/ 70035:
+/***/ 37114:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "T": () => (/* binding */ GithubCommand)
-/* harmony export */ });
-/* harmony import */ var octokit__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(57467);
-/* harmony import */ var _GenericCommand_js__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(20248);
+
+// EXPORTS
+__nccwpck_require__.d(__webpack_exports__, {
+  "T": () => (/* binding */ GithubCommand)
+});
+
+// EXTERNAL MODULE: ./node_modules/octokit/dist-node/index.js
+var dist_node = __nccwpck_require__(57467);
+// EXTERNAL MODULE: ./src/commands/GenericCommand.ts
+var GenericCommand = __nccwpck_require__(20248);
+// EXTERNAL MODULE: ./node_modules/date-fns/sub/index.js
+var sub = __nccwpck_require__(63875);
+var sub_default = /*#__PURE__*/__nccwpck_require__.n(sub);
+;// CONCATENATED MODULE: ./src/commands/GithubActionCommand.ts
 
 
-class GithubCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_0__/* .GenericCommand */ .u {
+
+class GithubActionCommand extends GenericCommand/* GenericCommand */.u {
     constructor(program) {
-        super('github', program);
-        this._program.command(this._name)
-            .description('github interactions')
-            .option('--collect-updated-cves', 'collect all the CVE IDs that were updated')
+        super('action', program);
+        let mainCommand = this._program.command(this._name)
+            .description('github actions')
+            .option('--collect-failed-updates', 'collect all update workflows that did not succeed', true)
+            .option('--collect-successful-updates', 'collect all update workflows that were successful', false)
+            .option('--days-ago <int>', 'only collect to number of days ago', "1")
+            // .option('--show-last-failed-updates <int>', 'show output of the last <n> update workflows that did not succeed', "1")
+            // .option('--max <int>', 'max number of runs to fetch', "10")
             .action(this.run);
     }
-    async run(options) {
-        super.prerun(options);
-        // super.timerReset();
-        console.log(`connecting to github`);
-        const repo = {
-            owner: `hkong-mitre`,
-            repo: `cvelistV5`
-        };
-        const octokit = new octokit__WEBPACK_IMPORTED_MODULE_1__/* .Octokit */ .vd({
-            owner: `hkong-mitre`,
-            repo: `cvelistV5`,
-            auth: `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`
-        });
-        const { data: { login }, } = await octokit.rest.users.getAuthenticated();
-        console.log(`logged in as ${login}`);
+    static shouldCollect(element, options) {
+        if (element.conclusion === 'success' && options.collectSuccessfulUpdates) {
+            return true;
+        }
+        if (element.conclusion !== 'success' && options.collectFailedUpdates) {
+            return true;
+        }
+        return false;
+    }
+    static async collectRuns(options) {
+        const octokit = await GithubCommand.connect();
+        // console.log(`connecting to github`);
+        // const octokit = new Octokit({
+        //   owner: `hkong-mitre`,
+        //   repo: `cvelistV5`,
+        //   auth: `${process.env.GITHUB_ACCESS_TOKEN}`
+        // });
+        // const { data: { login }, } = await octokit.rest.users.getAuthenticated();
+        // console.log(`logged in as ${login}`);
         // const data1 = await octokit.rest.actions.listWorkflowRunsForRepo(repo);
         // const data1 = await octokit.rest.actions.listRepoWorkflows(repo);
         // const data1 = await octokit.rest.actions.listRepoWorkflows({
-        const data1 = await octokit.rest.actions.listWorkflowRuns({
-            owner: `hkong-mitre`,
-            repo: `cvelistV5`,
-            workflow_id: "update.yml",
-            page: 1,
-        });
-        console.log(`workflows:  `, JSON.stringify(data1, null, 2));
-        const data = await octokit.graphql(`
-        {
-          repository(owner: "${login}", name: "cvelistV5") {
-            
-            issues(last: 3) {
-              edges {
-                node {
-                  title
+        const startWindow = options.start = sub_default()(new Date(), { days: options.daysAgo }).toISOString();
+        let nthPage = 1;
+        let nCollected = 0;
+        let date = "";
+        let data;
+        let retval = [];
+        do {
+            data = await octokit.rest.actions.listWorkflowRuns({
+                owner: `hkong-mitre`,
+                repo: `cvelistV5`,
+                workflow_id: "update.yml",
+                page: nthPage,
+                per_page: 25
+            });
+            // console.log(`workflows:  `, JSON.stringify(data1["data"], null, 2));
+            data["data"]["workflow_runs"].forEach(element => {
+                date = element.created_at;
+                if (GithubActionCommand.shouldCollect(element, options)) {
+                    nCollected++;
+                    const obj = {
+                        nCollected,
+                        id: element.id,
+                        date: element.created_at,
+                        conclusion: element.conclusion,
+                        url: element.url,
+                        html_url: element.html_url,
+                        logs_url: element.logs_url
+                    };
+                    retval.push(obj);
+                    console.log(`${JSON.stringify(obj, null, 2)},`);
                 }
-              }
-            }
-          }
+            });
+            nthPage++;
+        } while (date >= startWindow && nthPage < 75);
+        console.log(`${nCollected} ${options.collectSuccessfulUpdates ? "successful" : "failed"} runs in the last ${options.daysAgo} days`);
+        return retval;
+    }
+    async run(options) {
+        super.prerun(options);
+        super.timerReset();
+        if (options.collectFailedUpdates || options.collectSuccessfulUpdates) {
+            await GithubActionCommand.collectRuns(options);
         }
-      ` /*,
-        {
-          headers: {
-            authorization: `token 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`,
-          },
-        }*/);
-        console.log(`data:`, JSON.stringify(data, null, 2));
+        else if (options.showLastFailedUpdates) {
+            const failedRuns = await GithubActionCommand.collectRuns({
+                collectFailedUpdates: true,
+                collectSuccessfulUpdates: false
+            });
+        }
         super.postrun(options);
+    }
+}
+
+;// CONCATENATED MODULE: ./src/commands/GithubCommand.ts
+
+
+
+class GithubCommand extends GenericCommand/* GenericCommand */.u {
+    constructor(program) {
+        super('github', program);
+        let mainCommand = this._program.command(this._name)
+            .description('github interactions');
+        const githubActionCommand = new GithubActionCommand(mainCommand);
+    }
+    /** connects to github using the env specified access token, owner, and repo
+     *  @returns the octokit object
+     */
+    static async connect(owner = null, repo = null) {
+        owner = (owner) ? owner : `${process.env.GH_OWNER}`;
+        repo = (repo) ? repo : `${process.env.GH_REPO}`;
+        console.log(`connecting to github using octokit`);
+        const octokit = new dist_node/* Octokit */.vd({
+            owner: `${owner}`,
+            repo: `${repo}`,
+            auth: `${process.env.GH_ACCESS_TOKEN}`
+        });
+        const { data: { login }, } = await octokit.rest.users.getAuthenticated();
+        console.log(`logged in to ${owner}/${repo} as ${login}`);
+        return octokit;
+    }
+    async run(options) {
+        // super.prerun(options);
+        // if (options.collectFailedUpdates || options.collectSuccessfulUpdates) {
+        //   await GithubCommand.collectRuns(options, octokit);
+        // }
+        // else if (options.showLastFailedUpdates) {
+        //   const failedRuns = await GithubCommand.collectRuns(
+        //     {
+        //       collectFailedUpdates: true,
+        //       collectSuccessfulUpdates: false
+        //     },
+        //     octokit);
+        //   // let data = await axios.default.get(
+        //   //   // failedRuns[0].logs_url,
+        //   //   "https://api.github.com/repos/hkong-mitre/cvelistV5/actions/runs/4221173029/logs",
+        //   //   {
+        //   //     headers: {
+        //   //       // "Content-Type": "application/json",
+        //   //       // "CVE-API-ORG": `${process.env.CVE_API_ORG}`,
+        //   //       // "CVE-API-USER": `${process.env.CVE_API_USER}`,
+        //   //       // "CVE-API-KEY": `${process.env.CVE_API_KEY}`,
+        //   //       "authToken": `${process.env.GITHUB_ACCESS_TOKEN}`,
+        //   //       "redirect": "follow"
+        //   //     }
+        //   //   });
+        //   // console.log("data=", data);
+        // }
+        // const octokit = await GithubCommand.connect();
+        // const data1 = await octokit.graphql(
+        //   `
+        //     {
+        //       repository(owner: "hkong-mitre", name: "cvelistV5") {
+        //         issues(last: 3) {
+        //           edges {
+        //             node {
+        //               title
+        //             }
+        //           }
+        //         }
+        //       }
+        //     }
+        //   `
+        // );
+        // console.log(`data1:`, JSON.stringify(data1, null, 2));
+        // super.postrun(options);
     }
 }
 
@@ -64827,7 +64997,7 @@ class GithubCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_0__/* .G
 /* harmony export */ });
 /* harmony import */ var _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(20248);
 /* harmony import */ var _CveService_js__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(24086);
-/* harmony import */ var _CveUpdater_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(12970);
+/* harmony import */ var _CveUpdater_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(58786);
 /* harmony import */ var _DateCommand_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(63537);
 
 
@@ -64867,10 +65037,10 @@ class RebuildCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .
         }
         else {
             // -----update all
-            let totalCves = 0;
+            // let totalCves = 0;
             for (let page = 1; page <= totalPages; page++) {
                 resp = await updater.getCvesByPage(page, `${process.env.CVES_BASE_DIRECTORY}`);
-                totalCves += resp.summary.count;
+                // totalCves += resp.operation.summary.count;
             }
         }
         console.log(`opertion completed in ${super.timerSinceStart() / 1000 / 60} minutes at ${_DateCommand_js__WEBPACK_IMPORTED_MODULE_3__/* .DateCommand.getIsoDate */ .d.getIsoDate()}`);
@@ -64887,18 +65057,20 @@ class RebuildCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
 /* harmony export */   "z": () => (/* binding */ UpdateCommand)
 /* harmony export */ });
-/* harmony import */ var date_fns_sub__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(63875);
-/* harmony import */ var date_fns_sub__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(date_fns_sub__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(20248);
+/* harmony import */ var date_fns_sub__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(63875);
+/* harmony import */ var date_fns_sub__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(date_fns_sub__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _GenericCommand_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(20248);
 /* harmony import */ var _CveService_js__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(24086);
-/* harmony import */ var _CveUpdater_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(12970);
-/* harmony import */ var _DateCommand_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(63537);
+/* harmony import */ var _CveUpdater_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(58786);
+/* harmony import */ var _DateCommand_js__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(63537);
+/* harmony import */ var _core_ActivityLog_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(51474);
 
 
 
 
 
-class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .GenericCommand */ .u {
+
+class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_3__/* .GenericCommand */ .u {
     static defaultMins = parseInt(process.env.CVES_DEFAULT_UPDATE_LOOKBACK_IN_MINS || "180");
     constructor(program) {
         super('update', program);
@@ -64922,7 +65094,7 @@ class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .G
             console.log(`ignoring minutes-ago (${options.minutesAgo}), starting window is set to ${options.start}`);
         }
         else {
-            options.start = date_fns_sub__WEBPACK_IMPORTED_MODULE_3___default()(new Date(now), { minutes: minutesAgo }).toISOString();
+            options.start = date_fns_sub__WEBPACK_IMPORTED_MODULE_4___default()(new Date(now), { minutes: minutesAgo }).toISOString();
             console.log(`starting window calculated from --minutes-ago: ${options.start}`);
         }
         return options;
@@ -64930,7 +65102,7 @@ class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .G
     async run(options) {
         super.prerun(options);
         super.timerReset();
-        console.log(`update started at ${_DateCommand_js__WEBPACK_IMPORTED_MODULE_4__/* .DateCommand.getIsoDate */ .d.getIsoDate()}`);
+        console.log(`update started at ${_DateCommand_js__WEBPACK_IMPORTED_MODULE_5__/* .DateCommand.getIsoDate */ .d.getIsoDate()}`);
         const cveService = new _CveService_js__WEBPACK_IMPORTED_MODULE_0__/* .CveService */ .o();
         const updater = new _CveUpdater_js__WEBPACK_IMPORTED_MODULE_1__/* .CveUpdater */ .pL(`update command`, {
             path: options.output,
@@ -64939,16 +65111,105 @@ class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_2__/* .G
             logKeepPrevious: true
         });
         // ----- determine setup window from params
-        const newOptions = UpdateCommand.determineQueryOptions(options, _DateCommand_js__WEBPACK_IMPORTED_MODULE_4__/* .DateCommand.getIsoDate */ .d.getIsoDate());
+        const newOptions = UpdateCommand.determineQueryOptions(options, _DateCommand_js__WEBPACK_IMPORTED_MODULE_5__/* .DateCommand.getIsoDate */ .d.getIsoDate());
         // ----- update by window
         const args = process.argv;
         // const countResp = await cveService.cve({ queryString: `count_only=1` });
         const countResp = await cveService.cve({ queryString: `count_only=1&time_modified.gt=${newOptions.start}&time_modified.lt=${newOptions.stop}` });
         console.log(`count=${countResp.totalCount}`);
-        const cves = await updater.getCvesInWindow(newOptions.start, newOptions.stop, 500, `${process.env.CVES_BASE_DIRECTORY}`);
-        console.log(`cves=`, JSON.stringify(cves, null, 2));
-        console.log(`opertion completed in ${super.timerSinceStart() / 1000} seconds at ${_DateCommand_js__WEBPACK_IMPORTED_MODULE_4__/* .DateCommand.getIsoDate */ .d.getIsoDate()}`);
+        const activity = await updater.getCvesInWindow(newOptions.start, newOptions.stop, 500, `${process.env.CVES_BASE_DIRECTORY}`);
+        console.log(`cves=`, JSON.stringify(activity, null, 2));
+        const activityLog = new _core_ActivityLog_js__WEBPACK_IMPORTED_MODULE_2__/* .ActivityLog */ .D({
+            path: `${process.env.CVES_BASE_DIRECTORY}`,
+            filename: `recent_activities.json`
+        });
+        activityLog.prepend(activity);
+        activityLog.writeRecentFile();
+        console.log(`opertion completed in ${super.timerSinceStart() / 1000} seconds at ${_DateCommand_js__WEBPACK_IMPORTED_MODULE_5__/* .DateCommand.getIsoDate */ .d.getIsoDate()}`);
         super.postrun(newOptions);
+    }
+}
+
+
+/***/ }),
+
+/***/ 51474:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "D": () => (/* binding */ ActivityLog)
+/* harmony export */ });
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(57147);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(fs__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(71017);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/**
+ *  ActivityLog - log of activities
+ *  Intent is to log everything that makes changes to the repository
+ */
+
+
+class ActivityLog {
+    _options;
+    _fullpath;
+    _activities = [];
+    constructor(options) {
+        this._options = options;
+        this._options.path = options.path || `.`;
+        this._options.filename = options.filename || `./test/activities_recent.json`;
+        // this._options.mode = options.mode || `prepend`;
+        this._options.logAlways = options.logAlways || false;
+        this._options.logKeepPrevious = options.logKeepPrevious || false;
+        this._fullpath = `${this._options.path}/${this._options.filename}`;
+        // console.log(`options=`, this._options);
+        if (this._options.logKeepPrevious) {
+            this._activities = ActivityLog.readFile(this._fullpath);
+        }
+        else {
+            // fs.unlinkSync(this._fullpath);
+            this.clearActivities();
+        }
+    }
+    // clears the file
+    clearActivities() {
+        this._activities = [];
+    }
+    // prepends activity to activities
+    prepend(activity) {
+        // console.log(`options=`, this._options);
+        if (this._options.logAlways || activity?.steps.length > 0) {
+            this._activities.unshift(activity);
+        }
+        return this._activities;
+    }
+    // ----- IO ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+    /** writes activities to a file
+      * @return true iff the file was written
+      */
+    writeRecentFile() {
+        // console.log(`options=`, this._options);
+        if (this._options.logAlways || this._activities.length > 0) {
+            ActivityLog.writeFile(this._fullpath, JSON.stringify(this._activities, null, 2));
+            return true;
+        }
+        return false;
+    }
+    // static functions ----- ----- ----- ----- ----- ----- ----- ----- ----- 
+    /** reads in the recent activities into _activities */
+    static readFile(relFilepath) {
+        if (fs__WEBPACK_IMPORTED_MODULE_0___default().existsSync(relFilepath)) {
+            const str = fs__WEBPACK_IMPORTED_MODULE_0___default().readFileSync(relFilepath, { encoding: 'utf8', flag: 'r' });
+            return JSON.parse(str);
+        }
+        else {
+            return [];
+        }
+    }
+    /** writes to activity file */
+    static writeFile(relFilepath, body) {
+        const dirname = path__WEBPACK_IMPORTED_MODULE_1___default().dirname(relFilepath);
+        fs__WEBPACK_IMPORTED_MODULE_0___default().mkdirSync(dirname, { recursive: true });
+        fs__WEBPACK_IMPORTED_MODULE_0___default().writeFileSync(`${relFilepath}`, body);
     }
 }
 
@@ -64966,7 +65227,7 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony import */ var _commands_RebuildCommand_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(26979);
 /* harmony import */ var _commands_UpdateCommand_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(13272);
 /* harmony import */ var _commands_GenericCommand_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(20248);
-/* harmony import */ var _commands_GithubCommand_js__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(70035);
+/* harmony import */ var _commands_GithubCommand_js__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(37114);
 // set up environment
 
 dotenv__WEBPACK_IMPORTED_MODULE_0__.config();

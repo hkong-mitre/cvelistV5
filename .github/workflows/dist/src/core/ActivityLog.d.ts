@@ -1,40 +1,9 @@
 /**
- *  Activity logs
+ *  ActivityLog - log of activities
+ *  Intent is to log everything that makes changes to the repository
  */
-export interface ActivityError {
-    [key: string]: string;
-}
-export interface ActivityNotes {
-    [key: string]: string;
-}
-export interface ActivityAction {
-    startTime: string;
-    stopTime: string;
-    duration: string;
-    type: `github` | `manual`;
-    name: string;
-    url?: string;
-    "action-op": {
-        status: `complete` | `failed`;
-        errors?: ActivityError[];
-        notes?: ActivityNotes;
-    };
-}
-export interface ActivityOperation {
-    activity: string;
-    timestamp: string;
-    duration: string;
-    summary: {
-        startWindow?: string;
-        endWindow?: string;
-        page?: number;
-        count: number;
-        cveIds?: string[];
-    };
-}
-export interface Activity extends ActivityOperation {
-}
-export interface ActivityOptions {
+import { Activity } from './Activity.js';
+export interface ActivityLogOptions {
     path?: string;
     filename?: string;
     logCurrentActivity?: boolean;
@@ -42,13 +11,16 @@ export interface ActivityOptions {
     logKeepPrevious?: boolean;
 }
 export declare class ActivityLog {
-    _options: ActivityOptions;
+    _options: ActivityLogOptions;
     _fullpath: string;
     _activities: Activity[];
-    constructor(options: ActivityOptions);
+    constructor(options: ActivityLogOptions);
     clearActivities(): void;
     prepend(activity: Activity): Activity[];
-    writeRecentFile(): void;
+    /** writes activities to a file
+      * @return true iff the file was written
+      */
+    writeRecentFile(): boolean;
     /** reads in the recent activities into _activities */
     static readFile(relFilepath: string): Activity[];
     /** writes to activity file */
