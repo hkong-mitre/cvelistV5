@@ -1,5 +1,18 @@
 [
   {
+    "timestamp": "2023-03-01T06:46:16.426Z",
+    "duration": "990 msecs",
+    "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
+    "summary": {
+      "startWindow": "2023-03-01T03:46:15.774Z",
+      "endWindow": "2023-03-01T06:46:15.764Z",
+      "count": 1,
+      "cveIds": [
+        "CVE-2023-0361"
+      ]
+    }
+  },
+  {
     "timestamp": "2023-03-01T06:33:21.942Z",
     "duration": "1375 msecs",
     "activity": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
