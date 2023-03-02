@@ -1,14 +1,16 @@
-# Github Action for updates to the repository
+# Github Action for updates to this repository
 
 name: CVE Update
 on:
   # run every 5~10 minutes (min Github scheduling allowed)
-  # note this may not complete when the hourly "CVE Release" workflow starts, so that this update may not be reflected
-  #   in the CVE Release artifacts
-  # note also that if this job runs longer than 5 minutes, the next job will run 5 minutes after this completes
+  # note this may not complete when the hourly "CVE Release" workflow starts,
+  #   so that the updates in this task may not be reflected
+  #   in the CVE Release artifacts running in a separate workflow
+  # note also that if this job runs longer than 5 minutes,
+  #   the next job will run 5 minutes after this completes
   schedule:
     - cron: '*/5 * * * *'
-  # Allows you to run this workflow manually from the Actions tab
+  # Enables manual runs of this workflow from the Actions tab
   workflow_dispatch:
     inputs:
       logLevel:
@@ -30,17 +32,14 @@ jobs:
       CVE_API_ORG: ${{secrets.CVE_API_ORG}}
       CVE_API_USER: ${{secrets.CVE_API_USER}}
       CVE_API_KEY: ${{secrets.CVE_API_KEY}}
-      GH_OWNER: hkong-mitre
-      GH_REPO: cvelistV5
-    outputs:
-      v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
+    # outputs:
+    #   v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: update log
-        # run: echo "out=$(date '+%Y-%m-%d_%H%M_UTC')" >> $GITHUB_OUTPUT
+      - name: Update CVEs
         run: |
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
@@ -51,16 +50,5 @@ jobs:
           git config user.name "Github Action"
           git add preview_cves
           git commit -m "[UPDATE] updated/added CVEs from cveawg.mitre.org"
-          git remote set-url origin https://${GITHUB_TOKEN}@github.com/hkong-mitre/cvelistV5.git
+          git remote set-url origin https://${GITHUB_TOKEN}@github.com/${{github.repository}}.git
           git push
-
-      # - name: create release with source code as artifacts
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     name: CVE ${{ needs.generate-name.outputs.v_current_run_timestamp }}
-      #     # body: Descriptions for CVE ${{ needs.generate-name.outputs.v_current_run_timestamp }} goes here
-      #     body_path: ./release_notes.md
-      #     tag_name: cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
-      #     files: |
-      #       release_notes.md
-      #     #   cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}.zip
