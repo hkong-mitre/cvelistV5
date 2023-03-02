@@ -1,6 +1,6 @@
 [
   {
-    "startTime": "2023-03-02T03:50:08.586Z",
+    "startTime": "2023-03-02T03:56:26.617Z",
     "stopTime": "tbd",
     "duration": "tbd",
     "name": "cves in window",
@@ -18,13 +18,13 @@
     },
     "steps": [
       {
-        "startTime": "2023-03-02T03:50:08.587Z",
-        "stopTime": "2023-03-02T03:50:10.464Z",
-        "duration": "1877 msecs",
+        "startTime": "2023-03-02T03:56:26.617Z",
+        "stopTime": "2023-03-02T03:56:28.635Z",
+        "duration": "2018 msecs",
         "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
         "summary": {
-          "startWindow": "2023-03-02T00:50:07.471Z",
-          "endWindow": "2023-03-02T03:50:07.468Z",
+          "startWindow": "2023-03-02T00:56:25.777Z",
+          "endWindow": "2023-03-02T03:56:25.774Z",
           "count": 24,
           "cveIds": [
             "CVE-2022-4798",
