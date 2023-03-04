@@ -1,6 +1,6 @@
 [
   {
-    "startTime": "2023-03-04T20:34:34.086Z",
+    "startTime": "2023-03-04T20:41:08.390Z",
     "stopTime": "tbd",
     "duration": "tbd",
     "name": "cves in window",
@@ -18,13 +18,13 @@
     },
     "steps": [
       {
-        "startTime": "2023-03-04T20:34:34.087Z",
-        "stopTime": "2023-03-04T20:34:35.112Z",
-        "duration": "1025 msecs",
+        "startTime": "2023-03-04T20:41:08.391Z",
+        "stopTime": "2023-03-04T20:41:09.859Z",
+        "duration": "1468 msecs",
         "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
         "summary": {
-          "startWindow": "2023-03-04T17:34:33.549Z",
-          "endWindow": "2023-03-04T20:34:33.546Z",
+          "startWindow": "2023-03-04T17:41:07.491Z",
+          "endWindow": "2023-03-04T20:41:07.487Z",
           "count": 10,
           "cveIds": [
             "CVE-2014-125090",
