@@ -1,6 +1,6 @@
 [
   {
-    "startTime": "2023-03-05T02:29:46.704Z",
+    "startTime": "2023-03-05T03:12:06.995Z",
     "stopTime": "tbd",
     "duration": "tbd",
     "name": "cves in window",
@@ -18,13 +18,13 @@
     },
     "steps": [
       {
-        "startTime": "2023-03-05T02:29:46.705Z",
-        "stopTime": "2023-03-05T02:29:47.724Z",
-        "duration": "1019 msecs",
+        "startTime": "2023-03-05T03:12:06.996Z",
+        "stopTime": "2023-03-05T03:12:08.651Z",
+        "duration": "1655 msecs",
         "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
         "summary": {
-          "startWindow": "2023-03-04T23:29:46.053Z",
-          "endWindow": "2023-03-05T02:29:46.050Z",
+          "startWindow": "2023-03-05T00:12:06.023Z",
+          "endWindow": "2023-03-05T03:12:06.018Z",
           "count": 4,
           "cveIds": [
             "CVE-2008-10002",
