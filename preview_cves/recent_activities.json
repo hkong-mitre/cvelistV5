@@ -1,6 +1,6 @@
 [
   {
-    "startTime": "2023-03-05T13:48:53.334Z",
+    "startTime": "2023-03-05T13:55:33.717Z",
     "stopTime": "tbd",
     "duration": "tbd",
     "name": "cves in window",
@@ -18,13 +18,13 @@
     },
     "steps": [
       {
-        "startTime": "2023-03-05T13:48:53.335Z",
-        "stopTime": "2023-03-05T13:48:54.295Z",
-        "duration": "960 msecs",
+        "startTime": "2023-03-05T13:55:33.718Z",
+        "stopTime": "2023-03-05T13:55:35.015Z",
+        "duration": "1297 msecs",
         "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
         "summary": {
-          "startWindow": "2023-03-05T10:48:52.791Z",
-          "endWindow": "2023-03-05T13:48:52.787Z",
+          "startWindow": "2023-03-05T10:55:32.740Z",
+          "endWindow": "2023-03-05T13:55:32.737Z",
           "count": 1,
           "cveIds": [
             "CVE-2015-10089"
