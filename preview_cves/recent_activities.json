@@ -1,8 +1,8 @@
 [
   {
-    "startTime": "2023-03-09T16:01:21.726Z",
-    "stopTime": "2023-03-09T16:01:23.851Z",
-    "duration": "2125 msecs",
+    "startTime": "2023-03-09T16:23:27.712Z",
+    "stopTime": "2023-03-09T16:23:29.666Z",
+    "duration": "1954 msecs",
     "name": "cves in window",
     "status": "completed",
     "errors": [],
@@ -16,13 +16,13 @@
     },
     "steps": [
       {
-        "startTime": "2023-03-09T16:01:21.727Z",
-        "stopTime": "2023-03-09T16:01:23.294Z",
-        "duration": "1567 msecs",
+        "startTime": "2023-03-09T16:23:27.712Z",
+        "stopTime": "2023-03-09T16:23:28.955Z",
+        "duration": "1243 msecs",
         "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
         "summary": {
-          "startWindow": "2023-03-09T13:01:20.413Z",
-          "endWindow": "2023-03-09T16:01:20.409Z",
+          "startWindow": "2023-03-09T13:23:26.828Z",
+          "endWindow": "2023-03-09T16:23:26.824Z",
           "count": 11,
           "cveIds": [
             "CVE-2022-29056",
