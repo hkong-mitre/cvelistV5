@@ -1,8 +1,8 @@
 [
   {
-    "startTime": "2023-03-09T19:37:06.201Z",
-    "stopTime": "2023-03-09T19:37:08.586Z",
-    "duration": "2385 msecs",
+    "startTime": "2023-03-09T19:42:33.874Z",
+    "stopTime": "2023-03-09T19:42:35.536Z",
+    "duration": "1662 msecs",
     "name": "cves in window",
     "status": "completed",
     "errors": [],
@@ -16,13 +16,13 @@
     },
     "steps": [
       {
-        "startTime": "2023-03-09T19:37:06.201Z",
-        "stopTime": "2023-03-09T19:37:07.784Z",
-        "duration": "1583 msecs",
+        "startTime": "2023-03-09T19:42:33.874Z",
+        "stopTime": "2023-03-09T19:42:35.070Z",
+        "duration": "1196 msecs",
         "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
         "summary": {
-          "startWindow": "2023-03-09T16:37:04.931Z",
-          "endWindow": "2023-03-09T19:37:04.926Z",
+          "startWindow": "2023-03-09T16:42:33.178Z",
+          "endWindow": "2023-03-09T19:42:33.174Z",
           "count": 10,
           "cveIds": [
             "CVE-2018-1000802",
