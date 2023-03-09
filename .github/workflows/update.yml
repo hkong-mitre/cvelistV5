@@ -52,3 +52,9 @@ jobs:
           git commit -m "[UPDATE] updated/added CVEs from cveawg.mitre.org"
           git remote set-url origin https://${GITHUB_TOKEN}@github.com/${{github.repository}}.git
           git push
+      - name: output
+#         if: ${{ envA }} != ${{ envB }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+              core.notice("this is a notice")
