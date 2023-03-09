@@ -1,8 +1,8 @@
 [
   {
-    "startTime": "2023-03-09T22:31:23.795Z",
-    "stopTime": "2023-03-09T22:31:26.073Z",
-    "duration": "2278 msecs",
+    "startTime": "2023-03-09T22:41:12.293Z",
+    "stopTime": "2023-03-09T22:41:14.410Z",
+    "duration": "2117 msecs",
     "name": "cves in window",
     "status": "completed",
     "errors": [],
@@ -16,13 +16,13 @@
     },
     "steps": [
       {
-        "startTime": "2023-03-09T22:31:23.796Z",
-        "stopTime": "2023-03-09T22:31:25.302Z",
-        "duration": "1506 msecs",
+        "startTime": "2023-03-09T22:41:12.294Z",
+        "stopTime": "2023-03-09T22:41:13.907Z",
+        "duration": "1613 msecs",
         "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
         "summary": {
-          "startWindow": "2023-03-09T19:31:22.932Z",
-          "endWindow": "2023-03-09T22:31:22.928Z",
+          "startWindow": "2023-03-09T19:41:11.093Z",
+          "endWindow": "2023-03-09T22:41:11.090Z",
           "count": 38,
           "cveIds": [
             "CVE-2021-34125",
