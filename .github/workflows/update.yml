@@ -54,7 +54,7 @@ jobs:
           git push
       - name: output
 #         if: ${{ envA }} != ${{ envB }}
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6
         with:
           script: |
               core.notice("this is a notice")
