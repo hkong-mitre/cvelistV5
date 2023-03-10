@@ -68633,12 +68633,19 @@ class CveCore {
 
 ;// CONCATENATED MODULE: ./src/core/Delta.ts
 /**
- *  Delta object, calculates deltas in current activity
+ *  Delta object, calculates deltas in activities
  */
 
 
 
 
+// export interface DeltaProps {
+//   numDelta?: number;
+//   new?: CveCore[];
+//   published?: CveCore[];    // newly published CVEs
+//   updated?: CveCore[];      // CVEs previously published and modified
+//   unknown?: CveCore[];
+// }
 var DeltaQueue;
 (function (DeltaQueue) {
     DeltaQueue[DeltaQueue["kNew"] = 1] = "kNew";
@@ -68646,18 +68653,18 @@ var DeltaQueue;
     DeltaQueue[DeltaQueue["kUpdated"] = 3] = "kUpdated";
     DeltaQueue[DeltaQueue["kUnknown"] = 4] = "kUnknown";
 })(DeltaQueue = DeltaQueue || (DeltaQueue = {}));
-class Delta {
+class Delta /*implements DeltaProps*/ {
     numDelta = 0;
     published = [];
     new = [];
     updated = [];
     unknown = [];
-    debugPublished;
-    debugUpdated;
-    // if there were previous deltas, pass them in to get included, essentially appending new
-    //  deltas to the privous ones
+    /** constructor
+     *  @param prevDelta a previous delta to intialize this object, essentially appending new
+     *                   deltas to the privous ones (default is none)
+     */
     constructor(prevDelta = null) {
-        // update with props
+        // update with previous delta, if any
         if (prevDelta) {
             this.numDelta = prevDelta?.numDelta ?? 0;
             this.new = prevDelta?.new ? (0,lodash.cloneDeep)(prevDelta.new) : [];
@@ -68665,6 +68672,13 @@ class Delta {
             this.updated = prevDelta?.updated ? (0,lodash.cloneDeep)(prevDelta.updated) : [];
         }
     }
+    // ----- static functions ----- ----- 
+    /** returns useful components of a CveID:
+     *   - its name
+     *   - its partial path in the repository
+     *  @param path a full or partial filespec (for example, ./abc/def/CVE-1970-0001.json)
+     *  @todo should be in a separate CveId or Cve class
+     */
     static getCveIdMetaData(path) {
         try {
             const cveId = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
@@ -68676,9 +68690,12 @@ class Delta {
             return [undefined, undefined];
         }
     }
+    /** calculates the delta filtering using the specified directory
+     *  @param prevDelta the previous delta
+     *  @param dir directory to filter (note that this cannot have `./` or `../` since this is only doing a simple string match)
+     */
     static async calculateDelta(prevDelta, dir) {
-        console.log(`calcuateDelta()`);
-        console.log(`dir=${dir}`);
+        console.log(`calcuateDelta() in dir=${dir}`);
         const delta = new Delta(prevDelta);
         const git = simpleGit('./', { binary: 'git' });
         const status = await git.status();
@@ -68699,14 +68716,15 @@ class Delta {
         });
         return delta;
     }
+    // ----- private functions ----- -----
     /**
      * pure function:  given origQueue, this will either add cve if it is not already in origQueue
      * or replace the original in origQueue with cve
      * @param cve the CVE to be added/replaced
      * @param origQueue the original queue
      * @returns a typle:
-     *    [0] is the new queue (with the CVE either added or replaced)
-     *    [1] either 0 if CVE is replaced, or 1 if new, intended to be += to this.numDelta
+     *    [0] is the new queue (with the CVE either added or replace older)
+     *    [1] either 0 if CVE is replaced, or 1 if new, intended to be += to this.numDelta (deprecated)
      */
     _addOrReplace(cve, origQueue) {
         const i = (0,lodash.findIndex)(origQueue, item => item.cveId == cve.cveId);
@@ -68724,8 +68742,15 @@ class Delta {
      * @returns the total number of deltas in all the queues
      */
     calculateNumDelta() {
-        return this.new.length + this.published.length + this.updated.length + this.unknown.length;
+        return this.new.length
+            + this.published.length
+            + this.updated.length
+            + this.unknown.length;
     }
+    /** adds a cveCore object into one of the queues in a delta object
+     *  @param cve a CveCore object to be added
+     *  @param queue the DeltaQueue enum specifying which queue to add to
+     */
     add(cve, queue) {
         let tuple;
         switch (queue) {
@@ -68736,30 +68761,14 @@ class Delta {
                 break;
             case DeltaQueue.kPublished:
                 tuple = this._addOrReplace(cve, this.published);
-                // this.numDelta += tuple[1];
                 this.published = tuple[0];
-                // this.published.push(cve);
-                // this.numDelta++;
                 break;
             case DeltaQueue.kUpdated:
                 tuple = this._addOrReplace(cve, this.updated);
-                // this.numDelta += tuple[1];
                 this.updated = tuple[0];
-                // const i = findIndex(this.updated, item => item.cveId == cve.cveId);
-                // if (i < 0) {
-                //   // add only if not already in
-                //   this.updated.push(cve);
-                //   this.numDelta++;
-                // }
-                // else {
-                //   // otherwise remove the original and add the new since it is more updated
-                //   this.updated[i] = cve;
-                // }
                 break;
             default:
                 this.unknown.push(cve);
-                // this.numDelta++;
-                // throw new Error(`Delta: Unable to determine status of ${cve.cveId}`);
                 break;
         }
         this.numDelta = this.calculateNumDelta();
@@ -68925,10 +68934,9 @@ class CveUpdater {
                 // console.log(`getCvesInWindow.step.summary.count=${step.summary.count}`);
             }
         } while (step && newStartWindow < newEndWindow);
-        // update delta
+        // add remainder of Activity properties
         activity.delta = await Delta.calculateDelta({}, `${this._repository_base}`);
         // console.log(`activity after checking for delta:  ${JSON.stringify(activity, null, 2)}`);
-        // add remainder of Activity properties
         const timestampEnd = Date.now();
         activity.stopTime = new Date(timestampEnd).toISOString();
         activity.duration = `${timestampEnd - timestampStart} msecs`;
@@ -69442,12 +69450,13 @@ class RebuildCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_4__/* .
 
 
 class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_3__/* .GenericCommand */ .u {
+    /** default number of minutes to look back when a start date is not specified */
     static defaultMins = parseInt(process.env.CVES_DEFAULT_UPDATE_LOOKBACK_IN_MINS || "180");
     constructor(program) {
         super('update', program);
         const timestamp = new Date();
         this._program.command('update')
-            .description('incremental update using CVE Services')
+            .description('update CVEs using CVE Services')
             .option('--log-always', 'write logs even if no net changes', false)
             .option('--log-keep-previous', 'keeps previous run instead of clearing it first', false)
             .option('--logfile <string>', 'activies log filename', `recent_activities.json`)
@@ -69459,17 +69468,20 @@ class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_3__/* .G
             .action(this.run);
         this.timerReset();
     }
-    static determineQueryOptions(options, now) {
-        const minutesAgo = parseInt(options[`minutesAgo`]);
+    /** determines the time options (start, stop, minutesAgo) behavior */
+    static determineQueryTimeOptions(options, now) {
+        const newOptions = { ...options };
+        const minutesAgo = parseInt(newOptions[`minutesAgo`]);
         if (options.start) {
-            console.log(`ignoring minutes-ago (${options.minutesAgo}), starting window is set to ${options.start}`);
+            console.log(`ignoring minutes-ago (${newOptions.minutesAgo}), starting window is set to ${newOptions.start}`);
         }
         else {
-            options.start = date_fns_sub__WEBPACK_IMPORTED_MODULE_4___default()(new Date(now), { minutes: minutesAgo }).toISOString();
-            console.log(`starting window calculated from default --minutes-ago (${minutesAgo}): ${options.start}`);
+            newOptions.start = date_fns_sub__WEBPACK_IMPORTED_MODULE_4___default()(new Date(now), { minutes: minutesAgo }).toISOString();
+            console.log(`starting window calculated from default --minutes-ago (${minutesAgo}): ${newOptions.start}`);
         }
-        return options;
+        return newOptions;
     }
+    /** runs the command using user set or default/calculated options */
     async run(options) {
         super.prerun(options);
         super.timerReset();
@@ -69482,22 +69494,25 @@ class UpdateCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_3__/* .G
             logKeepPrevious: true
         });
         // ----- determine setup window from params
-        const newOptions = UpdateCommand.determineQueryOptions(options, _DateCommand_js__WEBPACK_IMPORTED_MODULE_5__/* .DateCommand.getIsoDate */ .d.getIsoDate());
+        const newOptions = UpdateCommand.determineQueryTimeOptions(options, _DateCommand_js__WEBPACK_IMPORTED_MODULE_5__/* .DateCommand.getIsoDate */ .d.getIsoDate());
         // ----- update by window
         const args = process.argv;
         // const countResp = await cveService.cve({ queryString: `count_only=1` });
         const countResp = await cveService.cve({ queryString: `count_only=1&time_modified.gt=${newOptions.start}&time_modified.lt=${newOptions.stop}` });
         console.log(`count=${countResp.totalCount}`);
         if (countResp.totalCount > 0) {
+            // @todo: change 500 to .env variable
             const activity = await updater.getCvesInWindow(newOptions.start, newOptions.stop, 500, `${process.env.CVES_BASE_DIRECTORY}`);
             console.log(`activity=`, JSON.stringify(activity, null, 2));
             // log activity
-            const activityLog = new _core_ActivityLog_js__WEBPACK_IMPORTED_MODULE_2__/* .ActivityLog */ .D({
-                path: `${process.env.CVES_BASE_DIRECTORY}`,
-                filename: `recent_activities.json`
-            });
-            activityLog.prepend(activity);
-            activityLog.writeRecentFile();
+            if (options.logAlways || activity?.delta?.numDelta > 0) {
+                const activityLog = new _core_ActivityLog_js__WEBPACK_IMPORTED_MODULE_2__/* .ActivityLog */ .D({
+                    path: options.path,
+                    filename: options.logfile
+                });
+                activityLog.prepend(activity);
+                activityLog.writeRecentFile();
+            }
         }
         else {
             console.log(`no new or updated CVEs`);
