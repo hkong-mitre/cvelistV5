@@ -45,16 +45,10 @@ jobs:
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           git pull
           node ./.github/workflows/dist/index.js update ${{ github.event.inputs.params }}
-          git status
-          git config user.email "github_action@example.com"
-          git config user.name "Github Action"
-          git add preview_cves
+#          git status
+#          git config user.email "github_action@example.com"
+#          git config user.name "Github Action"
+#          git add preview_cves
 #          git commit -m "[UPDATE] updated/added CVEs from cveawg.mitre.org"
 #          git remote set-url origin https://${GITHUB_TOKEN}@github.com/${{github.repository}}.git
 #          git push
-      - name: output
-#         if: ${{ envA }} != ${{ envB }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-              core.notice("this is a notice")
