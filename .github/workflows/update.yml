@@ -27,7 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CVE_SERVICES_URL: https://cveawg.mitre.org
-      CVES_BASE_DIRECTORY: ./preview_cves
+      CVES_BASE_DIRECTORY: preview_cves
+      CVES_RECENT_ACTIVITIES_FILENAME: recent_activities.json
       CVES_DEFAULT_UPDATE_LOOKBACK_IN_MINS: 180
       CVE_API_ORG: ${{secrets.CVE_API_ORG}}
       CVE_API_USER: ${{secrets.CVE_API_USER}}
