@@ -46,8 +46,6 @@ jobs:
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           git pull
           node ./.github/workflows/dist/index.js update ${{ github.event.inputs.params }}
-          git remote set-url origin https://${GITHUB_TOKEN}@github.com/${{github.repository}}.git
-          git push
 #          git status
 #          git config user.email "github_action@example.com"
 #          git config user.name "Github Action"
