@@ -11,8 +11,7 @@ export declare enum DeltaQueue {
     kUnknown = 4
 }
 export declare class Delta {
-    numDelta: number;
-    published: CveCore[];
+    numberOfChanges: number;
     new: CveCore[];
     updated: CveCore[];
     unknown: CveCore[];
@@ -40,10 +39,10 @@ export declare class Delta {
      * @param origQueue the original queue
      * @returns a typle:
      *    [0] is the new queue (with the CVE either added or replace older)
-     *    [1] either 0 if CVE is replaced, or 1 if new, intended to be += to this.numDelta (deprecated)
+     *    [1] either 0 if CVE is replaced, or 1 if new, intended to be += to this.numberOfChanges (deprecated)
      */
     private _addOrReplace;
-    /** calculates the numDelta property
+    /** calculates the numberOfChanges property
      * @returns the total number of deltas in all the queues
      */
     calculateNumDelta(): number;
@@ -52,4 +51,6 @@ export declare class Delta {
      *  @param queue the DeltaQueue enum specifying which queue to add to
      */
     add(cve: CveCore, queue: DeltaQueue): void;
+    /** summarize the information in this Delta object in human-readable form */
+    toText(): string;
 }

@@ -64589,8 +64589,8 @@ var DeltaQueue;
     DeltaQueue[DeltaQueue["kUnknown"] = 4] = "kUnknown";
 })(DeltaQueue = DeltaQueue || (DeltaQueue = {}));
 class Delta /*implements DeltaProps*/ {
-    numDelta = 0;
-    published = [];
+    numberOfChanges = 0;
+    // published: CveCore[] = [];
     new = [];
     updated = [];
     unknown = [];
@@ -64601,9 +64601,9 @@ class Delta /*implements DeltaProps*/ {
     constructor(prevDelta = null) {
         // update with previous delta, if any
         if (prevDelta) {
-            this.numDelta = prevDelta?.numDelta ?? 0;
+            this.numberOfChanges = prevDelta?.numberOfChanges ?? 0;
             this.new = prevDelta?.new ? (0,lodash.cloneDeep)(prevDelta.new) : [];
-            this.published = prevDelta?.published ? (0,lodash.cloneDeep)(prevDelta.published) : [];
+            // this.published = prevDelta?.published ? cloneDeep(prevDelta.published) : [];
             this.updated = prevDelta?.updated ? (0,lodash.cloneDeep)(prevDelta.updated) : [];
         }
     }
@@ -64630,7 +64630,7 @@ class Delta /*implements DeltaProps*/ {
      *  @param dir directory to filter (note that this cannot have `./` or `../` since this is only doing a simple string match)
      */
     static async calculateDelta(prevDelta, dir) {
-        console.log(`calcuateDelta() in dir=${dir}`);
+        console.log(`calcuating delta in dir=${dir}`);
         const delta = new Delta(prevDelta);
         const git = (0,esm/* simpleGit */.o5)('./', { binary: 'git' });
         const status = await git.status();
@@ -64659,7 +64659,7 @@ class Delta /*implements DeltaProps*/ {
      * @param origQueue the original queue
      * @returns a typle:
      *    [0] is the new queue (with the CVE either added or replace older)
-     *    [1] either 0 if CVE is replaced, or 1 if new, intended to be += to this.numDelta (deprecated)
+     *    [1] either 0 if CVE is replaced, or 1 if new, intended to be += to this.numberOfChanges (deprecated)
      */
     _addOrReplace(cve, origQueue) {
         const i = (0,lodash.findIndex)(origQueue, item => item.cveId == cve.cveId);
@@ -64673,12 +64673,12 @@ class Delta /*implements DeltaProps*/ {
             return [newQueue, 0];
         }
     }
-    /** calculates the numDelta property
+    /** calculates the numberOfChanges property
      * @returns the total number of deltas in all the queues
      */
     calculateNumDelta() {
         return this.new.length
-            + this.published.length
+            // + this.published.length
             + this.updated.length
             + this.unknown.length;
     }
@@ -64691,13 +64691,13 @@ class Delta /*implements DeltaProps*/ {
         switch (queue) {
             case DeltaQueue.kNew:
                 tuple = this._addOrReplace(cve, this.new);
-                // this.numDelta += tuple[1];
+                // this.numberOfChanges += tuple[1];
                 this.new = tuple[0];
                 break;
-            case DeltaQueue.kPublished:
-                tuple = this._addOrReplace(cve, this.published);
-                this.published = tuple[0];
-                break;
+            // case DeltaQueue.kPublished:
+            //   tuple = this._addOrReplace(cve, this.published);
+            //   this.published = tuple[0];
+            //   break;
             case DeltaQueue.kUpdated:
                 tuple = this._addOrReplace(cve, this.updated);
                 this.updated = tuple[0];
@@ -64706,7 +64706,19 @@ class Delta /*implements DeltaProps*/ {
                 this.unknown.push(cve);
                 break;
         }
-        this.numDelta = this.calculateNumDelta();
+        this.numberOfChanges = this.calculateNumDelta();
+    }
+    /** summarize the information in this Delta object in human-readable form */
+    toText() {
+        const newCves = [];
+        this.new.forEach(item => newCves.push(item.cveId));
+        const updatedCves = [];
+        this.updated.forEach(item => updatedCves.push(item.cveId));
+        const retstr = `${this.numberOfChanges} changes this operation:
+      - ${this.new.length} new CVEs:  ${newCves.join(', ')}
+      - ${this.updated.length} updated CVEs: ${updatedCves.join(', ')}.
+    `;
+        return retstr;
     }
 }
 
@@ -65482,6 +65494,7 @@ class UpdateCommand extends GenericCommand/* GenericCommand */.u {
             .option('--start <ISO string>', `specific start window, overrides any specifications from --minutes-ago`)
             .option('--stop <ISO string>', 'stop window, defaults to now', timestamp.toISOString())
             .option('--url <url>', 'source serve url', process.env.CVE_SERVICES_URL)
+            .option('--baseline', 'run this update as a new baseline')
             .action(this.run);
         this.timerReset();
     }
@@ -65522,7 +65535,7 @@ class UpdateCommand extends GenericCommand/* GenericCommand */.u {
             const activity = await updater.getCvesInWindow(newOptions.start, newOptions.stop, 500, `${process.env.CVES_BASE_DIRECTORY}`);
             console.log(`activity=`, JSON.stringify(activity, null, 2));
             // log activity
-            if (options.logAlways || activity?.delta?.numDelta > 0) {
+            if (options.logAlways || activity?.delta?.numberOfChanges > 0) {
                 // console.log(`will write recent activities`)
                 const activityLog = new ActivityLog/* ActivityLog */.D({
                     path: options.output,
@@ -65551,7 +65564,7 @@ class UpdateCommand extends GenericCommand/* GenericCommand */.u {
                 //   console.log(`adding ${file.cveId}`);
                 // });
                 // console.log(`commit -m 'abc'`);
-                ret = await git.commit("abc");
+                ret = await git.commit(`${activity.delta.toText()}`);
                 console.log(`git commit returned ${JSON.stringify(ret, null, 2)}`);
             }
         }
