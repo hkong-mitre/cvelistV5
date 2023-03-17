@@ -45,9 +45,9 @@ jobs:
           export TEMP_TIMESTAMP=$(date '+%Y-%m-%d_%H%M_UTC')
           echo "out=$TEMP_TIMESTAMP" >> $GITHUB_OUTPUT
           git pull
-          git config user.email "github_action@example.com"
-          git config user.name "Github Action"
-          git remote set-url origin https://${GITHUB_TOKEN}@github.com/${{github.repository}}.git
+          git config --global user.email "github_action@example.com"
+          git config --global user.name "Github Action"
+          git remote set-url origin https://${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}.git
           node ./.github/workflows/dist/index.js update ${{ github.event.inputs.params }}
 #          git status
 #          git config user.email "github_action@example.com"
