@@ -33,6 +33,7 @@ jobs:
       CVE_API_ORG: ${{secrets.CVE_API_ORG}}
       CVE_API_USER: ${{secrets.CVE_API_USER}}
       CVE_API_KEY: ${{secrets.CVE_API_KEY}}
+      # GH_TOKEN: ${GITHUB_TOKEN}
     # outputs:
     #   v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
     steps:
@@ -47,7 +48,7 @@ jobs:
           git pull
           git config --global user.email "github_action@example.com"
           git config --global user.name "cvelistV5 Github Action"
-          git remote set-url origin https://${{GITHUB_TOKEN}}@github.com/${{github.repository}}.git
+          git remote set-url origin https://${GITHUB_TOKEN}@github.com/${{github.repository}}.git
           node ./.github/workflows/dist/index.js update ${{ github.event.inputs.params }}
 #          git status
 #          git config user.email "github_action@example.com"
