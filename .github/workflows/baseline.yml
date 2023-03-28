@@ -36,7 +36,7 @@ jobs:
       - name: tag repository
         run: |
           git tag ${{ needs.generate-name.outputs.v_current_run_timestamp }}_baseline
-          git push origin cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
+          git push origin ${{ needs.generate-name.outputs.v_current_run_timestamp }}_baseline
       - name: build cves for zip download
         run: |
           pwd
