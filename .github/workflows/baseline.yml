@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@v3
       - name: tag repository
         run: |
-          git tag cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
+          git tag ${{ needs.generate-name.outputs.v_current_run_timestamp }}_baseline
           git push origin cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
       - name: build cves for zip download
         run: |
