@@ -3,6 +3,7 @@
  */
 import { CveCore } from './CveCore.js';
 export declare type IsoDate = string;
+export declare type CveId = string;
 export declare enum DeltaQueue {
     kNew = 1,
     kPublished = 2,
@@ -19,15 +20,9 @@ export declare class Delta {
      *                   deltas to the privous ones (default is none)
      */
     constructor(prevDelta?: Partial<Delta>);
-    /**
-     * Factory that generates a new Delta from git log based on a time window
-     * @param start git log start time window
-     * @param stop git log stop time window (defaults to now)
-     */
-    static newDeltaFromGitHistory(start: string, stop?: string, repository?: string): Promise<Delta>;
-    /** returns useful metadata given a repository filespec:
-     *   - its CVE ID (for example, CVE-1970-0001)
-     *   - its partial path in the repository (for example, ./abc/def/CVE-1970-0001)
+    /** returns useful components of a CveID:
+     *   - its name
+     *   - its partial path in the repository
      *  @param path a full or partial filespec (for example, ./abc/def/CVE-1970-0001.json)
      *  @todo should be in a separate CveId or Cve class
      */
@@ -58,9 +53,4 @@ export declare class Delta {
     add(cve: CveCore, queue: DeltaQueue): void;
     /** summarize the information in this Delta object in human-readable form */
     toText(): string;
-    /** writes to delta file
-     *  @param relFilepath relative path from current directory
-    */
-    writeFile(relFilepath?: string): void;
-    writeCves(relDir?: string, zipFile?: any): void;
 }
