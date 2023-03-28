@@ -1,7 +1,5 @@
 # cvelistV5
 
-> **Work In Progress** - use for notional workflow and integration only until the public preview release
-
 This repository is a JSON 5.0 view of the official CVE List. It is a work in progress. 
 - `preview_cves` directory contains all of the current CVEs from the official CVE Services API.  It is named `preview_cves` because this repository is still a work in progress.  It will eventually be named `cves` when current work is complete.
 - `review_set` directory has been removed.  It contained old data from October 2022, and was only used for review purposes in October 2022.

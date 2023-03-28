@@ -50,7 +50,7 @@ jobs:
           name: ${{ needs.generate-name.outputs.v_current_run_timestamp }}_all_CVEs_at_midnight.zip
           path: ./cves.zip
   create_release:
-    needs: [generate-name]
+    needs: [generate-name,create_artifacts]
     environment: development
     runs-on: ubuntu-latest
     steps:
