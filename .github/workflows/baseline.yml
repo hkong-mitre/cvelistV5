@@ -1,6 +1,6 @@
 # Github Action for midnight baseline releases
 
-name: CVE Release
+name: CVE Midnight Baseline
 on:
   # at midnight (UTC) every night
   schedule:
