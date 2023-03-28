@@ -3,9 +3,10 @@
 This repository is a JSON 5.0 cache of the official CVE List.
 
 - `cves` directory contains all of the current CVEs from the official CVE Services API.
-- `review_set` directory has been removed. It contained old data from October 2022, and was only used for review purposes in October 2022.
+- The older `preview_cves` has been replaced by `cves`.  It was only used for testing the workflows for building the files in the `cves` directory.
+- The even older `review_set` directory has been removed. It contained old data from October 2022, and was only used for review purposes in October 2022.
 
-The files here are identical in content to the JSON files retrieved from the [CVE Web Services](https://www.cve.org), with the exception that the files are prettyprinted here (using 4 spaces) for viewing.
+The JSON files in `cves` are identical in content to the JSON files retrieved from [CVE Web Services](https://www.cve.org), with the exception that the files are prettyprinted here (using 4 spaces) for easier viewing.
 
 ## Deprecated Services
 
