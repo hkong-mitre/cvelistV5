@@ -67703,9 +67703,10 @@ class DeltaCommand extends _GenericCommand_js__WEBPACK_IMPORTED_MODULE_1__/* .Ge
         console.log(delta.toText());
         const date = date_fns_format__WEBPACK_IMPORTED_MODULE_3___default()(timestamp, 'yyyy-MM-dd');
         const time = date_fns_format__WEBPACK_IMPORTED_MODULE_3___default()(timestamp, 'HH');
-        const deltaFilename = `${date}_delta_CVEs_since_${time}00Z`;
+        const deltaFilename = `${date}_delta_CVEs_at_${time}00Z`;
         delta.writeFile(`${deltaFilename}.json`);
         delta.writeCves(null, `${deltaFilename}.zip`);
+        delta.writeTextFile(`release_notes.md`);
         super.postrun(options);
     }
 }
