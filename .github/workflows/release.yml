@@ -53,6 +53,14 @@ jobs:
     needs: [generate-name]
     environment: development
     runs-on: ubuntu-latest
+    env:
+      CVE_SERVICES_URL: https://cveawg.mitre.org
+      CVES_BASE_DIRECTORY: cves
+      CVES_RECENT_ACTIVITIES_FILENAME: recent_activities.json
+      CVES_DEFAULT_UPDATE_LOOKBACK_IN_MINS: 180
+      CVE_API_ORG: ${{secrets.CVE_API_ORG}}
+      CVE_API_USER: ${{secrets.CVE_API_USER}}
+      CVE_API_KEY: ${{secrets.CVE_API_KEY}}
     steps:
       # - name: create release
       #   id: create_release
