@@ -84,12 +84,12 @@ jobs:
           workflow_conclusion: success
           skip_unpack: true
           if_no_artifact_found: fail
-      - name: build delta file
+      - name: build delta files
         run: |
           ls ./.github/workflows/dist
           node ./.github/workflows/dist/index.js delta
-      - name: Update release notes
-        run: echo "CVEs updated" > release_notes.md
+      # - name: Update release notes
+      #   run: echo "CVEs updated" > release_notes.md
       - name: create release with source code as artifacts
         uses: softprops/action-gh-release@v1
         with:
@@ -99,7 +99,6 @@ jobs:
           tag_name: cve_${{ needs.generate-name.outputs.v_current_run_timestamp }}
           files: |
             release_notes.md
-            update_log.md
-            preview_cves/recent_activities.json
+            cves/recent_activities.json
             *.zip
           #   cves_${{ needs.generate-name.outputs.v_current_run_timestamp }}.zip
