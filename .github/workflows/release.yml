@@ -73,7 +73,9 @@ jobs:
           skip_unpack: true
           if_no_artifact_found: fail
       - name: build delta file
-        run: node ./.github/workflows/dist/index.js delta
+        run: |
+          ls ./.github/workflows/dist
+          node ./.github/workflows/dist/index.js delta
       - name: Update release notes
         run: echo "CVEs updated" > release_notes.md
       - name: create release with source code as artifacts
