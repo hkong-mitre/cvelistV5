@@ -1,5 +1,48 @@
 [
   {
+    "startTime": "2023-04-01T17:07:57.705Z",
+    "stopTime": "2023-04-01T17:08:00.211Z",
+    "duration": "2506 msecs",
+    "name": "cves in window",
+    "status": "completed",
+    "errors": [],
+    "notes": {},
+    "delta": {
+      "numberOfChanges": 3,
+      "new": [],
+      "updated": [
+        {
+          "cveId": "CVE-2019-6245"
+        },
+        {
+          "cveId": "CVE-2019-6247"
+        },
+        {
+          "cveId": "CVE-2021-44960"
+        }
+      ],
+      "unknown": []
+    },
+    "steps": [
+      {
+        "startTime": "2023-04-01T17:07:57.706Z",
+        "stopTime": "2023-04-01T17:07:59.555Z",
+        "duration": "1849 msecs",
+        "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
+        "summary": {
+          "startWindow": "2023-04-01T14:07:56.863Z",
+          "endWindow": "2023-04-01T17:07:56.857Z",
+          "count": 3,
+          "cveIds": [
+            "CVE-2019-6245",
+            "CVE-2019-6247",
+            "CVE-2021-44960"
+          ]
+        }
+      }
+    ]
+  },
+  {
     "startTime": "2023-04-01T10:10:04.423Z",
     "stopTime": "2023-04-01T10:10:06.748Z",
     "duration": "2325 msecs",
