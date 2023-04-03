@@ -1,5 +1,40 @@
 [
   {
+    "startTime": "2023-04-03T12:47:06.671Z",
+    "stopTime": "2023-04-03T12:47:08.892Z",
+    "duration": "2221 msecs",
+    "name": "cves in window",
+    "status": "completed",
+    "errors": [],
+    "notes": {},
+    "delta": {
+      "numberOfChanges": 1,
+      "new": [
+        {
+          "cveId": "CVE-2023-26529"
+        }
+      ],
+      "updated": [],
+      "unknown": []
+    },
+    "steps": [
+      {
+        "startTime": "2023-04-03T12:47:06.672Z",
+        "stopTime": "2023-04-03T12:47:08.173Z",
+        "duration": "1501 msecs",
+        "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
+        "summary": {
+          "startWindow": "2023-04-03T09:47:05.897Z",
+          "endWindow": "2023-04-03T12:47:05.890Z",
+          "count": 1,
+          "cveIds": [
+            "CVE-2023-26529"
+          ]
+        }
+      }
+    ]
+  },
+  {
     "startTime": "2023-04-03T07:59:41.659Z",
     "stopTime": "2023-04-03T07:59:43.984Z",
     "duration": "2325 msecs",
