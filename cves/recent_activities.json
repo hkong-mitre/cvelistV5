@@ -1,5 +1,80 @@
 [
   {
+    "startTime": "2023-04-12T20:23:33.531Z",
+    "stopTime": "2023-04-12T20:23:35.459Z",
+    "duration": "1928 msecs",
+    "name": "cves in window",
+    "status": "completed",
+    "errors": [],
+    "notes": {},
+    "delta": {
+      "numberOfChanges": 5,
+      "new": [
+        {
+          "cveId": "CVE-2022-3404"
+        },
+        {
+          "cveId": "CVE-2023-1706"
+        },
+        {
+          "cveId": "CVE-2023-1992"
+        },
+        {
+          "cveId": "CVE-2023-24511"
+        }
+      ],
+      "updated": [
+        {
+          "cveId": "CVE-2023-0039"
+        }
+      ],
+      "unknown": []
+    },
+    "steps": [
+      {
+        "startTime": "2023-04-12T20:23:33.532Z",
+        "stopTime": "2023-04-12T20:23:34.713Z",
+        "duration": "1181 msecs",
+        "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
+        "summary": {
+          "startWindow": "2023-04-12T17:23:32.932Z",
+          "endWindow": "2023-04-12T20:23:32.915Z",
+          "count": 28,
+          "cveIds": [
+            "CVE-2022-3404",
+            "CVE-2023-0039",
+            "CVE-2023-1706",
+            "CVE-2023-1874",
+            "CVE-2023-1912",
+            "CVE-2023-1990",
+            "CVE-2023-1992",
+            "CVE-2023-24511",
+            "CVE-2023-24513",
+            "CVE-2023-24545",
+            "CVE-2023-26371",
+            "CVE-2023-26372",
+            "CVE-2023-26373",
+            "CVE-2023-26374",
+            "CVE-2023-26375",
+            "CVE-2023-26376",
+            "CVE-2023-26377",
+            "CVE-2023-26378",
+            "CVE-2023-26379",
+            "CVE-2023-26380",
+            "CVE-2023-26381",
+            "CVE-2023-26382",
+            "CVE-2023-26400",
+            "CVE-2023-26401",
+            "CVE-2023-26404",
+            "CVE-2023-28502",
+            "CVE-2023-28503",
+            "CVE-2023-28879"
+          ]
+        }
+      }
+    ]
+  },
+  {
     "startTime": "2023-04-12T20:08:32.011Z",
     "stopTime": "2023-04-12T20:08:33.738Z",
     "duration": "1727 msecs",
