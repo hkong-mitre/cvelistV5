@@ -1,5 +1,40 @@
 [
   {
+    "startTime": "2023-04-15T19:43:19.122Z",
+    "stopTime": "2023-04-15T19:43:21.276Z",
+    "duration": "2154 msecs",
+    "name": "cves in window",
+    "status": "completed",
+    "errors": [],
+    "notes": {},
+    "delta": {
+      "numberOfChanges": 1,
+      "new": [
+        {
+          "cveId": "CVE-2021-39295"
+        }
+      ],
+      "updated": [],
+      "unknown": []
+    },
+    "steps": [
+      {
+        "startTime": "2023-04-15T19:43:19.122Z",
+        "stopTime": "2023-04-15T19:43:20.455Z",
+        "duration": "1333 msecs",
+        "stepDescription": "UPDATE_BY_MODIFICATION_DATE_WINDOW",
+        "summary": {
+          "startWindow": "2023-04-15T16:43:18.214Z",
+          "endWindow": "2023-04-15T19:43:18.188Z",
+          "count": 1,
+          "cveIds": [
+            "CVE-2021-39295"
+          ]
+        }
+      }
+    ]
+  },
+  {
     "startTime": "2023-04-15T16:32:07.745Z",
     "stopTime": "2023-04-15T16:32:10.309Z",
     "duration": "2564 msecs",
