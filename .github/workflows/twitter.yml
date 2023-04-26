@@ -33,10 +33,10 @@ jobs:
     # outputs:
     #   v_current_run_timestamp: ${{ steps.get-timestamp.outputs.out }}
     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: tweet
         run: |
           node ./.github/workflows/dist/index.js twitter ${{ github.event.inputs.params }}
