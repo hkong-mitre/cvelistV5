@@ -43,12 +43,12 @@ jobs:
           fetch-depth: 0
           
       - name: Download twitter_log.json
-        if: success() || failure()
         uses: actions/download-artifact@v3
-        with:
-          name: twitter_log.json
+#         with:
+#           name: twitter_log.json
           
       - name: tweet
+        if: success() || failure()
         run: |
           ls -al
           # mv twitter_log2.json twitter_log.json
