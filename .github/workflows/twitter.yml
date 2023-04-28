@@ -47,7 +47,7 @@ jobs:
         with:
           workflow: twitter.yml
           workflow_conclusion: success
-          skip_unpack: true
+          skip_unpack: false
           if_no_artifact_found: ignore
         # actions/download-artifact@v3 does not work, so using dawidd6/action-download-artifact@v2
 #        uses: actions/download-artifact@v3
@@ -60,6 +60,7 @@ jobs:
           ls -al
           # mv twitter_log2.json twitter_log.json
           # cat twitter_log.json
+          unzip twitterlog.zip
           node ./.github/workflows/dist/index.js twitter ${{ github.event.inputs.params }}
           
           # prep uploading twitter_log.json
@@ -69,7 +70,7 @@ jobs:
           #mv twitter_log.json ~/gha_artifacts/twitter_log.json
           zip twitterlog.zip ./twitter_log.json
           ls -al
-          ls -al ~/gha_artifacts
+          #ls -al ~/gha_artifacts
           
       - name: Upload twitter_log.json
         if: success() || failure()
