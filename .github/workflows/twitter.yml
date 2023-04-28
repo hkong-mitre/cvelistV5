@@ -43,7 +43,12 @@ jobs:
           fetch-depth: 0
           
       - name: Download twitter_log.json
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow_conclusion: ""
+          if_no_artifact_found: ignore
+        # actions/download-artifact@v3 does not work, so using dawidd6/action-download-artifact@v2
+#        uses: actions/download-artifact@v3
 #         with:
 #           name: twitter_log.json
           
