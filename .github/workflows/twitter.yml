@@ -52,7 +52,7 @@ jobs:
         run: |
           ls -al
           # mv twitter_log2.json twitter_log.json
-          cat twitter_log.json
+          # cat twitter_log.json
           node ./.github/workflows/dist/index.js twitter ${{ github.event.inputs.params }}
           
           # prep uploading twitter_log.json
