@@ -45,6 +45,7 @@ jobs:
       - name: Download twitter_log.json
         uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: twitter.yml
           workflow_conclusion: ""
           if_no_artifact_found: ignore
         # actions/download-artifact@v3 does not work, so using dawidd6/action-download-artifact@v2
