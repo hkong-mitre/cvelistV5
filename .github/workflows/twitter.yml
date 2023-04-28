@@ -63,7 +63,8 @@ jobs:
           ls -al
           ls -al ~/gha_artifacts
           
-      - name: Upload twitter_log.json     
+      - name: Upload twitter_log.json
+        if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
           name: twitter_log.json
