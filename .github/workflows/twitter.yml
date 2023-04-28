@@ -52,6 +52,7 @@ jobs:
           
       - name: tweet
         run: |
+          ls -al
           node ./.github/workflows/dist/index.js twitter ${{ github.event.inputs.params }}
           
           
