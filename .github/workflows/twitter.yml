@@ -72,7 +72,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
-          name: twitter_log.json
+          name: twitterlog
           path: ~/gha_artifacts/twitter_log.json
           
           
