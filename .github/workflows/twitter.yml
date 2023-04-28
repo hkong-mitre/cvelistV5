@@ -43,6 +43,7 @@ jobs:
           fetch-depth: 0
           
       - name: Download twitter_log.json
+        if: success() || failure()
         uses: actions/download-artifact@v3
         with:
           name: twitter_log.json
