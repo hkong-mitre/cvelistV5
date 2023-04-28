@@ -42,25 +42,26 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Download artifact from baseline workflow
-        uses: dawidd6/action-download-artifact@v2
+      - name: Download twitter_log.json
+        uses: actions/download-artifact@v3
         with:
-          name: twitter_log.json
-          path: ./twitter_log.json
-          workflow_conclusion: success
-          if_no_artifact_found: ignore          
+          name: twitter_log2.json
           
       - name: tweet
         run: |
           ls -al
+          mv twitter_log2.json twitter_log.json
           node ./.github/workflows/dist/index.js twitter ${{ github.event.inputs.params }}
           
+          # prep uploading twitter_log2.json
+          mkdir -p ~/gha_artifacts
+          mv twitter_log.json ~/gha_artifacts/twitter_log2.json
           
-      - name: Use the Upload Artifact GitHub Action
+      - name: Use the Upload Artifact GitHub Action     
         uses: actions/upload-artifact@v3
         with:
-          name: twitter_log.json
-          path: ./twitter_log.json
+          name: twitter_log2.json
+          path: ~/gha_artifacts/twitter_log2.json
           
           
       - name: output
