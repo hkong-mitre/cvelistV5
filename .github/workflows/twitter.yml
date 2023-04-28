@@ -8,8 +8,8 @@ on:
   #   in the CVE Release artifacts running in a separate workflow
   # note also that if this job runs longer than 5 minutes,
   #   the next job will run 5 minutes after this completes
-  schedule:
-  - cron: '*/15 * * * *'
+#   schedule:
+#   - cron: '*/15 * * * *'
   # Enables manual runs of this workflow from the Actions tab
   workflow_dispatch:
     inputs:
@@ -42,26 +42,28 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Download twitter_log.json
-        uses: actions/download-artifact@v3
-        with:
-          name: twitter_log2.json
+#       - name: Download twitter_log.json
+#         uses: actions/download-artifact@v3
+#         with:
+#           name: twitter_log.json
           
       - name: tweet
         run: |
           ls -al
-          mv twitter_log2.json twitter_log.json
+          # mv twitter_log2.json twitter_log.json
           node ./.github/workflows/dist/index.js twitter ${{ github.event.inputs.params }}
           
-          # prep uploading twitter_log2.json
+          # prep uploading twitter_log.json
+          ls -al
+          cat twitter_log.json
           mkdir -p ~/gha_artifacts
-          mv twitter_log.json ~/gha_artifacts/twitter_log2.json
+          mv twitter_log.json ~/gha_artifacts/twitter_log.json
           
       - name: Use the Upload Artifact GitHub Action     
         uses: actions/upload-artifact@v3
         with:
-          name: twitter_log2.json
-          path: ~/gha_artifacts/twitter_log2.json
+          name: twitter_log.json
+          path: ~/gha_artifacts/twitter_log.json
           
           
       - name: output
