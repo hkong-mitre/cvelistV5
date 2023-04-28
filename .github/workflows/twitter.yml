@@ -47,7 +47,7 @@ jobs:
         with:
           workflow: twitter.yml
           workflow_conclusion: success
-          skip_unpack: false
+          skip_unpack: true
           if_no_artifact_found: ignore
         # actions/download-artifact@v3 does not work, so using dawidd6/action-download-artifact@v2
 #        uses: actions/download-artifact@v3
