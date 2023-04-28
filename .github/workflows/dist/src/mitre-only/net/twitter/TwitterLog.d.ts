@@ -1,0 +1,50 @@
+import { IsoDateString } from '../../../common/IsoDateString.js';
+import { CveTweetData } from './CveTweetData.js';
+export declare class TwitterLog {
+    filepath: string;
+    last_successful_tweet_timestamp: IsoDateString;
+    newCves: CveTweetData[];
+    tweetedCves: CveTweetData[];
+    private constructor();
+    /** reads in the recent activities into _activities */
+    static fromLogfile(relFilepath: string): TwitterLog;
+    /** using Git and twitter_log.json, build up a new TwitterLog
+     * @param start git log start time window
+     * @param stop git log stop time window (defaults to now)
+     * @param repository directory to get git info from (defaults to process.env.CVES_BASE_DIRECTORY)
+     * @param twitterLogfile the path to the twitterlog file (defaults to ./twitter_log.json)
+     */
+    static fromGit(twitterLogfile?: string, repository?: string, start?: string, stop?: string): Promise<TwitterLog>;
+    /**
+     * adds a CveTweetData to the newCves queue iff it is not already in the tweetedCves queue
+     * @param data a CveTweetData object
+     */
+    addNew(data: CveTweetData): void;
+    /**
+     * returns the first newCve, BUT DOES NOT REMOVE IT in case the tweet failed
+     */
+    nextNew(): CveTweetData;
+    setTweeted(data: CveTweetData): void;
+    /**
+     * adds data to tweetedCves list, and removes it from the newCves list
+     * @param data the CveTweetData that was successfully tweeted
+     */
+    pushAsTweeted(data: CveTweetData): void;
+    /**
+     * cleans up the properties in this class:
+     * 1. move all tweeted cves from newCves to tweetedCves
+     * 2. reverse chronologically orders tweetedCves
+     * 3. remove all tweetedCves older than TWITTER_JSON_KEEP_MINS
+     */
+    cleanup(): void;
+    /** properly outputs this object in JSON.stringify() */
+    toJSON(): {
+        last_successful_tweet_timestamp: string;
+        newCves: CveTweetData[];
+        tweetedCves: CveTweetData[];
+    };
+    /** writes to twitter_log.json file
+     *  @param relFilepath path to write to, defaults to the same filepath that was read from
+     */
+    writeLogfile(relFilepath?: string): void;
+}

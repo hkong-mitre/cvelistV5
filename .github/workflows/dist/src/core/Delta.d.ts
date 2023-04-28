@@ -9,7 +9,7 @@
  *  However, if you need to make zip files, it will copy files to a directory, and zip that, so the /cves directory
  *  will need to be in the current directory
  */
-import { CveCore } from './CveCore.js';
+import { CveCorePlus } from './CveCorePlus.js';
 export declare type IsoDate = string;
 export declare enum DeltaQueue {
     kNew = 1,
@@ -19,9 +19,9 @@ export declare enum DeltaQueue {
 }
 export declare class Delta {
     numberOfChanges: number;
-    new: CveCore[];
-    updated: CveCore[];
-    unknown: CveCore[];
+    new: CveCorePlus[];
+    updated: CveCorePlus[];
+    unknown: CveCorePlus[];
     /** constructor
      *  @param prevDelta a previous delta to intialize this object, essentially appending new
      *                   deltas to the privous ones (default is none)
@@ -31,8 +31,10 @@ export declare class Delta {
      * Factory that generates a new Delta from git log based on a time window
      * @param start git log start time window
      * @param stop git log stop time window (defaults to now)
+     * @param repository directory to get git info from (defaults to process.env.CVES_BASE_DIRECTORY)
+     * @param fullCveCore when set to true, it will read andfill CveCorePlus properties from the corresponding files in local repository
      */
-    static newDeltaFromGitHistory(start: string, stop?: string, repository?: string): Promise<Delta>;
+    static newDeltaFromGitHistory(start: string, stop?: string, repository?: string, fullCveCore?: boolean): Promise<Delta>;
     /** returns useful metadata given a repository filespec:
      *   - its CVE ID (for example, CVE-1970-0001)
      *   - its partial path in the repository (for example, ./abc/def/CVE-1970-0001)
@@ -60,15 +62,15 @@ export declare class Delta {
      */
     calculateNumDelta(): number;
     /** adds a cveCore object into one of the queues in a delta object
-     *  @param cve a CveCore object to be added
+     *  @param cve a CveCorePlus object to be added
      *  @param queue the DeltaQueue enum specifying which queue to add to
      */
-    add(cve: CveCore, queue: DeltaQueue): void;
+    add(cve: CveCorePlus, queue: DeltaQueue): void;
     /** summarize the information in this Delta object in human-readable form */
     toText(): string;
     /** writes the delta to a JSON file
      *  @param relFilepath relative path from current directory
-    */
+     */
     writeFile(relFilepath?: string): void;
     /**
      * Copies delta CVEs to a specified directory, and optionally zip the resulting directory

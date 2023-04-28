@@ -71686,7 +71686,7 @@ try {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var dotenv__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(12437);
 /* harmony import */ var dotenv__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(dotenv__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _mitre_only_commands_MitreOnlyCommands_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(6922);
+/* harmony import */ var _mitre_only_commands_MitreOnlyCommands_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(7070);
 // set up environment
 
 dotenv__WEBPACK_IMPORTED_MODULE_0__.config();
@@ -71715,7 +71715,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 6922:
+/***/ 7070:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -73082,6 +73082,9 @@ function formatInTimeZone(date, timeZone, formatStr, options) {
   return format_format(utcToZonedTime(date, timeZone), formatStr, extendedOptions)
 }
 
+// EXTERNAL MODULE: ./node_modules/date-fns/add/index.js
+var add = __nccwpck_require__(96211);
+var add_default = /*#__PURE__*/__nccwpck_require__.n(add);
 ;// CONCATENATED MODULE: ./src/common/IsoDateString.ts
 /** Class representing a strongly opinionated ISO Date+Time+TZ string with utils
  *  Note that this class was written to be very opinionated. See IsoDateString.test.ts for properly formatted
@@ -73090,17 +73093,29 @@ function formatInTimeZone(date, timeZone, formatStr, options) {
  *
  *  Note that in the future, if necessary, we can extend what this class covers, but for now
  *    this strict and opinionated set is very useful for processing ISO Date+Time+TZ strings
-*/
+ */
 /** a regular expression to represent an ISO Date+Time+TZ string
  *  taken from https://stackoverflow.com/a/3143231/1274852
  *  works for cases used in CVE representations
  */
+
 const IsoDateStringRegEx = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
 class IsoDateString {
     // _type: string = "IsoDateString";
-    _isoDateString = "";
-    /** returns a IsoDateString object iff isoDateStr is a properly formatted ISO Date+Time+TZ string */
-    constructor(isoDateStr) {
+    _isoDateString = '';
+    /** returns a IsoDateString object iff isoDateStr is a properly formatted ISO Date+Time+TZ string,
+     *  or if a string is not specified, then this will create a IsoDateString of "now" using new Date()
+     *  @param isoDateStr a properly formatted ISO Date+Time+TZ string (defaults to now)
+     *  @param assumeZ set to true if want to assume a trailing Z for GMT/Zulu time zone (default is false)
+     *                 this is needed because CVEs timestamps may be missing the timezone, and we are assuming it to be GMT
+     */
+    constructor(isoDateStr = null, assumeZ = false) {
+        if (!isoDateStr) {
+            isoDateStr = new Date().toISOString();
+        }
+        if (isoDateStr[isoDateStr.length] !== 'Z' && assumeZ) {
+            isoDateStr = `${isoDateStr}Z`;
+        }
         if (IsoDateString.isIsoDateString(isoDateStr)) {
             this._isoDateString = isoDateStr;
         }
@@ -73110,11 +73125,15 @@ class IsoDateString {
     }
     /** returns the number of characters in the string representation */
     length() {
-        return (this._isoDateString).length;
+        return this._isoDateString.length;
     }
     /** returns the string representation */
     toString() {
         return this._isoDateString;
+    }
+    /** properly outputs the object in JSON.stringify() */
+    toJSON() {
+        return this.toString();
     }
     /** returns a JS Date object from the string representation */
     toDate() {
@@ -73124,6 +73143,15 @@ class IsoDateString {
     /** strict testing of a string for being a valid ISO Date+Time+TZ string  */
     static isIsoDateString(str) {
         return IsoDateStringRegEx.test(str);
+    }
+    /**
+     * return a new IsoDateString that is minutes ago or since
+     * @param minutes positive number to minutes ago, negative number for minutes since
+     * @returns a new IsoDateString that is specified minutes ago or since
+     */
+    minutesAgo(minutes) {
+        const timeStamp = add_default()(this.toDate(), { minutes: -minutes });
+        return new IsoDateString(timeStamp.toISOString());
     }
 }
 
@@ -77387,12 +77415,16 @@ var esm_default = (/* unused pure expression or super */ null && (gitInstanceFac
 
 // EXTERNAL MODULE: ./node_modules/lodash/lodash.js
 var lodash = __nccwpck_require__(90250);
+// EXTERNAL MODULE: ./node_modules/dotenv/lib/main.js
+var main = __nccwpck_require__(12437);
 ;// CONCATENATED MODULE: ./src/core/CveId.ts
 /**
  *  CveId is an object that represents a CVE ID and provides
  *  helper functions to use it
  */
 
+
+main.config();
 class CveIdError extends Error {
 }
 class CveId {
@@ -77405,7 +77437,7 @@ class CveId {
      */
     constructor(id) {
         if (CveId.toCvePath(id)) {
-            this.id = (id instanceof CveId) ? id.id : id;
+            this.id = id instanceof CveId ? id.id : id;
         }
         // else {
         //   throw new CveIdError(`Error in CVE ID:  ${id}`);
@@ -77449,9 +77481,15 @@ class CveId {
      *    [true,"CVE","1999","12xxx", "12345"]
      */
     static toComponents(cveId) {
-        const id = (cveId instanceof CveId) ? cveId.id : cveId;
+        const id = cveId instanceof CveId ? cveId.id : cveId;
         // assume a tup representing an invalid CVE ID
-        const tup = [false, undefined, undefined, undefined, undefined];
+        const tup = [
+            false,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+        ];
         if (id === null || id === undefined || id?.length === 0) {
             return tup;
         }
@@ -77461,12 +77499,10 @@ class CveId {
         }
         const year = parseInt(parts[1]);
         const num = parseInt(parts[2]);
-        if (parts[0] === 'CVE'
-            && CveId.getAllYears().includes(year)
-            && num >= 1) {
+        if (parts[0] === 'CVE' && CveId.getAllYears().includes(year) && num >= 1) {
             parts.shift(); // removes the 'CVE'
             const thousands = Math.floor(num / 1000).toFixed(0);
-            return [true, "CVE", parts[0], `${thousands}xxx`, parts[1]];
+            return [true, 'CVE', parts[0], `${thousands}xxx`, parts[1]];
         }
         else {
             return tup;
@@ -77492,10 +77528,12 @@ class CveId {
             // @todo note the following uses local time
             // @todo note hard-coded offset
             const endYear = new Date().getFullYear() + 2;
-            const valid_cve_years_plus = [...Array(endYear - startYear + 1).keys()].map(i => i + startYear);
+            const valid_cve_years_plus = [
+                ...Array(endYear - startYear + 1).keys(),
+            ].map((i) => i + startYear);
             CveId._years = [
                 1970,
-                ...valid_cve_years_plus
+                ...valid_cve_years_plus,
             ];
         }
         return CveId._years;
@@ -77513,7 +77551,7 @@ class CveId {
     /** given a cveId, returns the git hub repository partial directory it should go into
      *  @param cveId string or CveId object representing the CVE ID (e.g., CVE-1999-0001)
      *  @returns string representing the partial path the cve belongs in (e.g., /1999/1xxx)
-    */
+     */
     static getCveDir(cveId) {
         const tup = CveId.toComponents(cveId);
         if (tup[0] === true) {
@@ -77526,7 +77564,7 @@ class CveId {
     /** given a cveId, returns the git hub repository partial path (directory and filename without extension) it should go into
      *  @param cveId string representing the CVE ID (e.g., CVE-1999-0001)
      *  @returns string representing the partial path the cve belongs in (e.g., /1999/1xxx/CVE-1999-0001)
-    */
+     */
     static toCvePath(cveId) {
         // const id = (cveId instanceof CveId) ? cveId.id : cveId;
         const dir = CveId.getCveDir(cveId);
@@ -77536,11 +77574,11 @@ class CveId {
 
 ;// CONCATENATED MODULE: ./src/core/CveCore.ts
 /**
- *  CveCore is made up of mostly the metadata portion of a CVE JSON 5 object
- *    plus (eventually) of additional metadata (such as SHA) that is useful for managing/validating CVEs
- */
+ *  CveCore is made up of the metadata portion of a CVE JSON 5 object
+ *  Note that it is convenient to store additional data for some operations,
+ *  and for that, the CveCorePlus object should be used
+\ */
 
-// import { IsoDateString } from '../common/IsoDateString.js';
 
 class CveCore {
     cveId;
@@ -77550,20 +77588,34 @@ class CveCore {
     dateReserved;
     datePublished;
     dateUpdated;
-    // constructors and factories
+    // ----- constructors and factories ----- ----- ----- ----- -----
+    /**
+     * constructor which builds a minimum CveCore from a CveId or string
+     * @param cveId a CveId or string
+     */
     constructor(cveId) {
-        this.cveId = (cveId instanceof CveId) ? cveId : new CveId(cveId);
+        this.cveId = cveId instanceof CveId ? cveId : new CveId(cveId);
     }
+    /**
+     * builds a full CveCore using provided metadata
+     * @param metadata the CveMetadata in CVE JSON 5.0 schema
+     * @returns
+     */
     static fromCveMetadata(metadata) {
         const obj = new CveCore(metadata?.cveId);
-        obj.state = metadata?.state;
-        obj.assignerOrgId = metadata?.assignerOrgId;
-        obj.assignerShortName = metadata?.assignerShortName;
-        obj.dateReserved = metadata?.dateReserved;
-        obj.datePublished = metadata?.datePublished;
-        // obj.dateUpdated = metadata?.dateUpdated;
+        obj.set(metadata);
         return obj;
     }
+    // ----- accessors and mutators ----- ----- ----- -----
+    set(metadata) {
+        this.state = metadata?.state;
+        this.assignerOrgId = metadata?.assignerOrgId;
+        this.assignerShortName = metadata?.assignerShortName;
+        this.dateReserved = metadata?.dateReserved;
+        this.datePublished = metadata?.datePublished;
+        this.dateUpdated = metadata?.dateUpdated;
+    }
+    // updateFromJsonString(jsonstr: string) {}
     /**
      * returns the CveId from a full or partial path (assuming the file is in the repository directory)
      *  @param path the full or partial file path to CVE JSON file
@@ -77578,6 +77630,7 @@ class CveCore {
         }
     }
     /**
+     * @todo this really belongs in CveId, not here, especially now that we have updateFromRepositoryFile
      * returns the CveId from a full or partial path (assuming the file is in the repository directory)
      *  @param path the full or partial file path to CVE JSON file
      *  @returns the CveId calculated from the filename
@@ -77599,157 +77652,6 @@ class CveCore {
     }
     getCvePath() {
         return this.cveId.getCvePath();
-    }
-}
-
-;// CONCATENATED MODULE: ./src/core/git.ts
-/** a wrapper/fascade class to make it easier to use git libraries from within cve utils */
-
-
-
-class git_Git {
-    // fullOriginUrl: string;  // full URL with tokens and/or username/passwords
-    localDir; // must be an existing directory
-    git;
-    // other credentials are in GH_XXXXX environment variables
-    /** constructor
-     * @param init initializer
-     */
-    constructor(init = undefined) {
-        // this.fullOriginUrl = init?.fullOriginUrl ? init.fullOriginUrl : `https://${process.env.GH_TOKEN}@github.com/${process.env.GH_OWNER}/${process.env.GH_REPO}.git`;
-        this.localDir = init?.localDir ? init.localDir : `${process.cwd()}`;
-        console.log(`git working directory set to ${this.localDir}`);
-        this.git = simpleGit(this.localDir, { binary: 'git' });
-        this.git.cwd(this.localDir);
-    }
-    /** returns git status in a promise
-     *  Note that while StatusResult shows files with paths relative to pwd, working
-     *  with those files (for example, add or rm) requires a full path
-    */
-    async status() {
-        const status = await this.git.status();
-        // console.log(`status=${JSON.stringify(status, null, 2)}`);
-        return status;
-    }
-    // generic error callback
-    static genericCallback(err) {
-        if (err) {
-            throw err;
-            console.log(`git error:  ${err}`);
-        }
-        ;
-    }
-    /** git add files
-     *  Note that fullPathFiles must be either full path specs or partial paths from this.localDir
-     *  Note that fullPathFiles should NOT be a directory
-     *
-    */
-    async add(fullPathFiles) {
-        console.log(`adding ${JSON.stringify(fullPathFiles)}`);
-        const retval = this.git.add(fullPathFiles, git_Git.genericCallback);
-        return retval;
-    }
-    /** git rm files
-     *  Note that fullPathFiles must be either full path specs or partial paths from this.localDir
-     *  Note that fullPathFiles should NOT be a directory
-    */
-    async rm(fullPathFiles) {
-        const retval = this.git.rm(fullPathFiles, git_Git.genericCallback);
-        return retval;
-    }
-    // // see https://github.com/steveukx/git-js/blob/main/simple-git/test/unit/fetch.spec.ts for examples
-    // async fetch(): Promise<Response<FetchResult>> {
-    //   const retval = this.git.fetch(Git.genericCallback)
-    //   return retval
-    // }
-    // @todo:  implement pull
-    /**
-     * commits staged files
-     * @param msg commit message
-     * @returns CommitResult
-     *
-     */
-    async commit(msg) {
-        const retval = this.git.commit(msg, git_Git.genericCallback);
-        return retval;
-    }
-    /**
-     *  logs commit hash and date between time window
-     */
-    async logCommitHashInWindow(start, stop) {
-        // console.log(`logCommitHashInWindow(${start},${stop})`);
-        const response = await this.git.raw('log', `--after="${start}"`, `--before="${stop}"`, 
-        // `--pretty=format:"%H %ci"`,
-        `--pretty=format:"%H"`, `--relative=${this.localDir}`);
-        let retval = [];
-        if (response.length > 0) {
-            let split = response.split('\n');
-            split.forEach(item => retval.push(item.split('"')[1]));
-        }
-        // console.log(`retval from logCommitHashInWindow():  ${retval}`);
-        return retval;
-    }
-    /**
-     *  logs changed filenames in time window
-     */
-    async logChangedFilenamesInTimeWindow(start, stop) {
-        // console.log(`logChangedFilenamesInTimeWindow(${start},${stop})`);
-        const commits = await this.logCommitHashInWindow(start, stop);
-        // console.log(`commits=${commits}`);
-        if (commits.length > 0) {
-            const files = await this.git.raw('diff', `--name-only`, `${commits[0]}..${commits[commits.length - 1]}`, `--relative=${this.localDir}`);
-            console.log(`retval from logChangedFilenamesInTimeWindow:  ${files}`);
-            let retval = files.split('\n');
-            if (retval[retval.length - 1] === "") {
-                // remove last empty \n
-                retval.pop();
-            }
-            return retval;
-        }
-        else {
-            return [];
-        }
-    }
-    /**
-     *  logs deltas in time window
-     */
-    async logDeltasInTimeWindow(start, stop) {
-        // console.log(`logChangedFilenamesInTimeWindow(${start},${stop})`);
-        const commits = await this.logCommitHashInWindow(start, stop);
-        console.log(`retval from logCommitHashInWindow:  ${JSON.stringify(commits)}`);
-        const delta = new Delta();
-        if (commits.length > 0) {
-            const data = await this.git.raw('diff', `--raw`, `${commits[commits.length - 1]}..${commits[0]}`, `--relative=${this.localDir}`);
-            console.log(`retval from diff between commits ${commits[commits.length - 1]}..${commits[0]}:\n  ${data}`);
-            const lines = data.split('\n');
-            // remove last empty \n
-            lines.pop();
-            lines.forEach(line => {
-                const [a, b, c, d, subline] = line.split(' ');
-                const action = subline[0];
-                const path = subline.substring(1).trim();
-                console.log(`line=${line}`);
-                console.log(`action=${action}  path=${path}`);
-                const cveId = CveCore.getCveIdfromRepositoryFilePath(path);
-                if (CveId.isValidCveId(cveId)) {
-                    switch (action) {
-                        case 'A':
-                            delta.add(CveCore.fromRepositoryFilePath(path), DeltaQueue.kNew);
-                            break;
-                        case 'M':
-                            delta.add(CveCore.fromRepositoryFilePath(path), DeltaQueue.kUpdated);
-                            break;
-                        default:
-                            delta.add(CveCore.fromRepositoryFilePath(path), DeltaQueue.kUnknown);
-                            break;
-                    }
-                }
-                else {
-                    //skip since it's not a CVE
-                }
-            });
-        }
-        return delta;
     }
 }
 
@@ -77828,6 +77730,220 @@ class FsUtils {
     }
 }
 
+;// CONCATENATED MODULE: ./src/core/CveCorePlus.ts
+/**
+ *  CveCorePlus is made up of mostly the metadata portion of a CVE JSON 5 object
+ *    (so everything in CveCore)
+ *    plus things that are useful to store for various purposes (e.g., twitter):
+ *      description from container.cna.description
+ */
+
+
+
+
+
+class CveCorePlus extends CveCore {
+    description;
+    // ----- constructors and factories ----- ----- ----- ----- -----
+    /**
+     * constructor which builds a minimum CveCore from a CveId or string
+     * @param cveId a CveId or string
+     */
+    constructor(cveId) {
+        super(cveId);
+    }
+    /**
+     * builds a full CveCorePlus from a CveCore
+     * @param cveCore a CveCore object
+     * @returns a CveCorePlus object
+     */
+    static fromCveCore(cveCore) {
+        const obj = new CveCorePlus(cveCore?.cveId);
+        obj.state = cveCore?.state;
+        obj.assignerOrgId = cveCore?.assignerOrgId;
+        obj.assignerShortName = cveCore?.assignerShortName;
+        obj.dateReserved = cveCore?.dateReserved;
+        obj.datePublished = cveCore?.datePublished;
+        obj.dateUpdated = cveCore?.dateUpdated;
+        return obj;
+    }
+    // ----- accessors and mutators ----- ----- ----- -----
+    updateFromLocalRepository() {
+        const filepath = `${this.cveId.getFullCvePath()}.json`;
+        console.log(`filepath=${filepath}`);
+        let json = [];
+        if (FsUtils.exists(filepath)) {
+            const str = external_fs_default().readFileSync(filepath, { encoding: 'utf8', flag: 'r' });
+            if (str.length > 0) {
+                json = JSON.parse(str);
+                // console.log(`json=${JSON.stringify(json, null, 2)}`);
+                this.set(json['cveMetadata']);
+                this.description =
+                    json['containers']['cna']['descriptions'][0]['value'];
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+}
+
+;// CONCATENATED MODULE: ./src/core/git.ts
+/** a wrapper/fascade class to make it easier to use git libraries from within cve utils */
+
+
+
+class git_Git {
+    // fullOriginUrl: string;  // full URL with tokens and/or username/passwords
+    localDir; // must be an existing directory
+    git;
+    // other credentials are in GH_XXXXX environment variables
+    /** constructor
+     * @param init initializer
+     */
+    constructor(init = undefined) {
+        // this.fullOriginUrl = init?.fullOriginUrl ? init.fullOriginUrl : `https://${process.env.GH_TOKEN}@github.com/${process.env.GH_OWNER}/${process.env.GH_REPO}.git`;
+        this.localDir = init?.localDir ? init.localDir : `${process.cwd()}`;
+        console.log(`git working directory set to ${this.localDir}`);
+        this.git = simpleGit(this.localDir, { binary: 'git' });
+        this.git.cwd(this.localDir);
+    }
+    /** returns git status in a promise
+     *  Note that while StatusResult shows files with paths relative to pwd, working
+     *  with those files (for example, add or rm) requires a full path
+     */
+    async status() {
+        const status = await this.git.status();
+        // console.log(`status=${JSON.stringify(status, null, 2)}`);
+        return status;
+    }
+    // generic error callback
+    static genericCallback(err) {
+        if (err) {
+            throw err;
+            console.log(`git error:  ${err}`);
+        }
+    }
+    /** git add files
+     *  Note that fullPathFiles must be either full path specs or partial paths from this.localDir
+     *  Note that fullPathFiles should NOT be a directory
+     *
+     */
+    async add(fullPathFiles) {
+        console.log(`adding ${JSON.stringify(fullPathFiles)}`);
+        const retval = this.git.add(fullPathFiles, git_Git.genericCallback);
+        return retval;
+    }
+    /** git rm files
+     *  Note that fullPathFiles must be either full path specs or partial paths from this.localDir
+     *  Note that fullPathFiles should NOT be a directory
+     */
+    async rm(fullPathFiles) {
+        const retval = this.git.rm(fullPathFiles, git_Git.genericCallback);
+        return retval;
+    }
+    // // see https://github.com/steveukx/git-js/blob/main/simple-git/test/unit/fetch.spec.ts for examples
+    // async fetch(): Promise<Response<FetchResult>> {
+    //   const retval = this.git.fetch(Git.genericCallback)
+    //   return retval
+    // }
+    // @todo:  implement pull
+    /**
+     * commits staged files
+     * @param msg commit message
+     * @returns CommitResult
+     *
+     */
+    async commit(msg) {
+        const retval = this.git.commit(msg, git_Git.genericCallback);
+        return retval;
+    }
+    /**
+     *  logs commit hash and date between time window
+     */
+    async logCommitHashInWindow(start, stop) {
+        // console.log(`logCommitHashInWindow(${start},${stop})`);
+        const response = await this.git.raw('log', `--after="${start}"`, `--before="${stop}"`, 
+        // `--pretty=format:"%H %ci"`,
+        `--pretty=format:"%H"`, `--relative=${this.localDir}`);
+        let retval = [];
+        if (response.length > 0) {
+            let split = response.split('\n');
+            split.forEach((item) => retval.push(item.split('"')[1]));
+        }
+        // console.log(`retval from logCommitHashInWindow():  ${retval}`);
+        return retval;
+    }
+    /**
+     *  logs changed filenames in time window
+     */
+    async logChangedFilenamesInTimeWindow(start, stop) {
+        // console.log(`logChangedFilenamesInTimeWindow(${start},${stop})`);
+        const commits = await this.logCommitHashInWindow(start, stop);
+        // console.log(`commits=${commits}`);
+        if (commits.length > 0) {
+            const files = await this.git.raw('diff', `--name-only`, `${commits[0]}..${commits[commits.length - 1]}`, `--relative=${this.localDir}`);
+            console.log(`retval from logChangedFilenamesInTimeWindow:  
+          ${files[0]}..${files[files.length - 1]}`);
+            let retval = files.split('\n');
+            if (retval[retval.length - 1] === '') {
+                // remove last empty \n
+                retval.pop();
+            }
+            return retval;
+        }
+        else {
+            return [];
+        }
+    }
+    /**
+     *  logs deltas in time window
+     */
+    async logDeltasInTimeWindow(start, stop) {
+        // console.log(`logChangedFilenamesInTimeWindow(${start},${stop})`);
+        const commits = await this.logCommitHashInWindow(start, stop);
+        console.log(`retval from logCommitHashInWindow: [size=${commits.length}]:
+      ${commits[0]}..${commits[commits.length - 1]}`);
+        const delta = new Delta();
+        if (commits.length > 0) {
+            const data = await this.git.raw('diff', `--raw`, `${commits[commits.length - 1]}..${commits[0]}`, `--relative=${this.localDir}`);
+            console.log(`retval from diff between commits:
+        ${commits[commits.length - 1]}..${commits[0]}:\n ${data}`);
+            const lines = data.split('\n');
+            // remove last empty \n
+            lines.pop();
+            lines.forEach((line) => {
+                const [a, b, c, d, subline] = line.split(' ');
+                const action = subline[0];
+                const path = subline.substring(1).trim();
+                // console.log(`line=${line}`);
+                // console.log(`action=${action}  path=${path}`);
+                const cveId = CveCorePlus.getCveIdfromRepositoryFilePath(path);
+                if (CveId.isValidCveId(cveId)) {
+                    const cve = new CveCore(cveId);
+                    const cvep = CveCorePlus.fromCveCore(cve);
+                    switch (action) {
+                        case 'A':
+                            delta.add(cvep, DeltaQueue.kNew);
+                            break;
+                        case 'M':
+                            delta.add(cvep, DeltaQueue.kUpdated);
+                            break;
+                        default:
+                            delta.add(cvep, DeltaQueue.kUnknown);
+                            break;
+                    }
+                }
+                else {
+                    //skip since it's not a CVE
+                }
+            });
+        }
+        return delta;
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/core/Delta.ts
 /**
  *  This is the Delta class.  A delta is a list of files in a directory whose content changed from time T1 to T2.
@@ -77875,14 +77991,16 @@ class Delta /*implements DeltaProps*/ {
             this.updated = prevDelta?.updated ? (0,lodash.cloneDeep)(prevDelta.updated) : [];
         }
     }
-    // ----- factory functions ----- ----- 
+    // ----- factory functions ----- -----
     /**
      * Factory that generates a new Delta from git log based on a time window
      * @param start git log start time window
      * @param stop git log stop time window (defaults to now)
+     * @param repository directory to get git info from (defaults to process.env.CVES_BASE_DIRECTORY)
+     * @param fullCveCore when set to true, it will read andfill CveCorePlus properties from the corresponding files in local repository
      */
-    static async newDeltaFromGitHistory(start, stop = null, repository = null) {
-        stop = (stop) ? stop : new Date().toISOString();
+    static async newDeltaFromGitHistory(start, stop = null, repository = null, fullCveCore = false) {
+        stop = stop ? stop : new Date().toISOString();
         const localDir = repository ? repository : (external_process_default()).env.CVES_BASE_DIRECTORY;
         console.log(`building new delta of ${localDir} from ${start} to ${stop}`);
         const git = new git_Git({ localDir });
@@ -77891,9 +78009,14 @@ class Delta /*implements DeltaProps*/ {
         //   const tuple = Delta.getCveIdMetaData(element);
         //   delta.add(new CveCore(tuple[0]), DeltaQueue.kUnknown);
         // });
+        if (fullCveCore) {
+            delta.new.forEach((cvep) => {
+                cvep.updateFromLocalRepository();
+            });
+        }
         return delta;
     }
-    // ----- static functions ----- ----- 
+    // ----- static functions ----- -----
     /** returns useful metadata given a repository filespec:
      *   - its CVE ID (for example, CVE-1970-0001)
      *   - its partial path in the repository (for example, ./abc/def/CVE-1970-0001)
@@ -77921,18 +78044,18 @@ class Delta /*implements DeltaProps*/ {
         const git = simpleGit('./', { binary: 'git' });
         const status = await git.status();
         // console.log(`status = ${JSON.stringify(status, null, 2)}`);
-        const notAddedList = status.not_added.filter(item => item.startsWith(dir));
-        const modifiedList = status.modified.filter(item => item.startsWith(dir));
-        notAddedList.forEach(item => {
+        const notAddedList = status.not_added.filter((item) => item.startsWith(dir));
+        const modifiedList = status.modified.filter((item) => item.startsWith(dir));
+        notAddedList.forEach((item) => {
             const cveId = Delta.getCveIdMetaData(item)[0];
             if (cveId) {
-                delta.add(new CveCore(cveId), DeltaQueue.kNew);
+                delta.add(new CveCorePlus(cveId), DeltaQueue.kNew);
             }
         });
-        modifiedList.forEach(item => {
+        modifiedList.forEach((item) => {
             const cveId = Delta.getCveIdMetaData(item)[0];
             if (cveId) {
-                delta.add(new CveCore(cveId), DeltaQueue.kUpdated);
+                delta.add(new CveCorePlus(cveId), DeltaQueue.kUpdated);
             }
         });
         // console.log(`delta = ${JSON.stringify(delta, null, 2)}`);
@@ -77949,7 +78072,7 @@ class Delta /*implements DeltaProps*/ {
      *    [1] either 0 if CVE is replaced, or 1 if new, intended to be += to this.numberOfChanges (deprecated)
      */
     _addOrReplace(cve, origQueue) {
-        const i = (0,lodash.findIndex)(origQueue, item => item.cveId.id == cve.cveId.id);
+        const i = (0,lodash.findIndex)(origQueue, (item) => item.cveId.id == cve.cveId.id);
         if (i < 0) {
             return [[...origQueue, cve], 1];
         }
@@ -77964,13 +78087,13 @@ class Delta /*implements DeltaProps*/ {
      * @returns the total number of deltas in all the queues
      */
     calculateNumDelta() {
-        return this.new.length
+        return (this.new.length +
             // + this.published.length
-            + this.updated.length
-            + this.unknown.length;
+            this.updated.length +
+            this.unknown.length);
     }
     /** adds a cveCore object into one of the queues in a delta object
-     *  @param cve a CveCore object to be added
+     *  @param cve a CveCorePlus object to be added
      *  @param queue the DeltaQueue enum specifying which queue to add to
      */
     add(cve, queue) {
@@ -78004,11 +78127,11 @@ class Delta /*implements DeltaProps*/ {
     /** summarize the information in this Delta object in human-readable form */
     toText() {
         const newCves = [];
-        this.new.forEach(item => newCves.push(item.cveId.id));
+        this.new.forEach((item) => newCves.push(item.cveId.id));
         const updatedCves = [];
-        this.updated.forEach(item => updatedCves.push(item.cveId.id));
+        this.updated.forEach((item) => updatedCves.push(item.cveId.id));
         const unkownFiles = [];
-        this.unknown.forEach(item => unkownFiles.push(item.cveId.id));
+        this.unknown.forEach((item) => unkownFiles.push(item.cveId.id));
         let s = `${this.new.length} new | ${this.updated.length} updated`;
         if (this.unknown.length > 0) {
             s += ` | ${this.unknown.length} other files`;
@@ -78016,16 +78139,20 @@ class Delta /*implements DeltaProps*/ {
         const retstr = `${this.numberOfChanges} changes (${s}):
       - ${this.new.length} new CVEs:  ${newCves.join(', ')}
       - ${this.updated.length} updated CVEs: ${updatedCves.join(', ')}
-      ${this.unknown.length > 0 ? `- ${this.unknown.length} other files: ${unkownFiles.join(', ')}` : ``}
+      ${this.unknown.length > 0
+            ? `- ${this.unknown.length} other files: ${unkownFiles.join(', ')}`
+            : ``}
     `;
         return retstr;
     }
     // ----- ----- Output to files
     /** writes the delta to a JSON file
      *  @param relFilepath relative path from current directory
-    */
+     */
     writeFile(relFilepath = null) {
-        relFilepath = relFilepath ? relFilepath : `${(external_process_default()).env.CVES_BASE_DIRECTORY}/delta.json`;
+        relFilepath = relFilepath
+            ? relFilepath
+            : `${(external_process_default()).env.CVES_BASE_DIRECTORY}/delta.json`;
         // console.log(`relFilepath=${relFilepath}`);
         const dirname = external_path_default().dirname(relFilepath);
         external_fs_default().mkdirSync(dirname, { recursive: true });
@@ -78042,13 +78169,13 @@ class Delta /*implements DeltaProps*/ {
         relDir = relDir ? relDir : `${pwd}/deltas`;
         external_fs_default().mkdirSync(relDir, { recursive: true });
         console.log(`copying changed CVEs to ${relDir}`);
-        this.new.forEach(item => {
+        this.new.forEach((item) => {
             const cveid = new CveId(item.cveId);
             const cvePath = cveid.getFullCvePath();
             console.log(`  ${item.cveId.id} (new)`);
             external_fs_default().copyFileSync(`${cvePath}.json`, `${relDir}/${item.cveId.id}.json`);
         });
-        this.updated.forEach(item => {
+        this.updated.forEach((item) => {
             const cveid = new CveId(item.cveId);
             const cvePath = cveid.getFullCvePath();
             console.log(`  ${item.cveId.id} (updated)`);
@@ -78057,7 +78184,7 @@ class Delta /*implements DeltaProps*/ {
         console.log(`${this.numberOfChanges} CVEs copied to ${relDir}`);
         if (zipFile) {
             const listing = FsUtils.ls(relDir);
-            FsUtils.generateZipfile(listing, zipFile, "deltaCves", relDir);
+            FsUtils.generateZipfile(listing, zipFile, 'deltaCves', relDir);
             console.log(`zip file generated as ${relDir}/${zipFile}`);
         }
     }
@@ -78065,7 +78192,7 @@ class Delta /*implements DeltaProps*/ {
         relFilepath = relFilepath ? relFilepath : 'delta.md';
         let text = this.toText();
         if (text.length === 0) {
-            text = "no files were changed";
+            text = 'no files were changed';
         }
         external_fs_default().writeFileSync(relFilepath, text);
     }
@@ -83229,8 +83356,6 @@ class MainCommands {
 
 // EXTERNAL MODULE: ./node_modules/octokit/dist-node/index.js
 var dist_node = __nccwpck_require__(57467);
-// EXTERNAL MODULE: ./node_modules/dotenv/lib/main.js
-var main = __nccwpck_require__(12437);
 ;// CONCATENATED MODULE: ./src/mitre-only/commands/GithubActionCommand.ts
 
 main.config();
@@ -83597,7 +83722,228 @@ class RebuildCommand extends GenericCommand {
 
 // EXTERNAL MODULE: ./node_modules/twitter-api-v2/dist/cjs/index.js
 var cjs = __nccwpck_require__(15395);
-;// CONCATENATED MODULE: ./src/mitre-only/net/TwitterManager.ts
+;// CONCATENATED MODULE: ./src/mitre-only/net/twitter/CveTweetData.ts
+
+class CveTweetData {
+    cveId;
+    description;
+    datePublished;
+    tweetText;
+    tweeted;
+    // ----- constructor and factories ----- ----- ----- -----
+    /**
+     * constructs a CveTweetData
+     * @param cveId required CveId
+     * @param description required full description text
+     * @param datePublished optional date published
+     * @param tweetText calculated or copied text to be tweeted
+     * @param tweeted calcuated or copied timestamp when tweeted
+     */
+    constructor(cveId, description, datePublished = null, tweetText = null, tweeted = null) {
+        this.cveId = cveId;
+        this.description = description;
+        this.datePublished = datePublished;
+        this.tweetText = tweetText;
+        this.tweeted = tweeted;
+    }
+    static fromCveCorePlus(cvep) {
+        const ctd = new CveTweetData(cvep.cveId, cvep.description, new IsoDateString(cvep.datePublished, true));
+        return ctd;
+    }
+    toJson() {
+        return {
+            cveId: this.cveId,
+            description: this.description,
+            datePublished: this.datePublished.toString(),
+            tweetText: this.tweetText,
+            tweeted: this.tweeted.toString(),
+        };
+    }
+    /**
+     * returns true iff this.tweeted is set
+     */
+    isTweeted() {
+        return this.tweeted !== null;
+    }
+    /**
+     * sets the tweeted property to the current date
+     */
+    setTweeted() {
+        this.tweeted = new IsoDateString();
+        return this.tweeted;
+    }
+}
+
+;// CONCATENATED MODULE: ./src/mitre-only/net/twitter/TwitterLog.ts
+
+
+
+
+
+
+// import { CveTweetData } from './TwitterManager.js';
+class TwitterLog {
+    filepath = undefined;
+    last_successful_tweet_timestamp;
+    newCves;
+    tweetedCves;
+    // ----- constructors and factory functions ----- ----- ----- ----- ----- ----- ----- ----- -----
+    constructor() {
+        this.last_successful_tweet_timestamp = new IsoDateString();
+        this.newCves = [];
+        this.tweetedCves = [];
+    }
+    /** reads in the recent activities into _activities */
+    static fromLogfile(relFilepath) {
+        const twitterLog = new TwitterLog();
+        twitterLog.filepath = relFilepath;
+        if (!external_fs_default().existsSync(relFilepath)) {
+            console.log(`twitter log file not found:  ${relFilepath}`);
+        }
+        else {
+            let json = [];
+            const str = external_fs_default().readFileSync(relFilepath, { encoding: 'utf8', flag: 'r' });
+            if (str.length > 0) {
+                json = JSON.parse(str);
+            }
+            // console.log(`json=${JSON.stringify(json, null, 2)}`);
+            if (json['last_successful_tweet_timestamp']) {
+                twitterLog.last_successful_tweet_timestamp =
+                    json['last_successful_tweet_timestamp'];
+            }
+            json['newCves']?.forEach((item) => {
+                twitterLog.addNew(item);
+            });
+            json['tweetedCves']?.forEach((item) => {
+                twitterLog.setTweeted(item);
+            });
+        }
+        return twitterLog;
+    }
+    /** using Git and twitter_log.json, build up a new TwitterLog
+     * @param start git log start time window
+     * @param stop git log stop time window (defaults to now)
+     * @param repository directory to get git info from (defaults to process.env.CVES_BASE_DIRECTORY)
+     * @param twitterLogfile the path to the twitterlog file (defaults to ./twitter_log.json)
+     */
+    static async fromGit(twitterLogfile = null, repository = null, start = null, stop = null) {
+        const twitterLog = TwitterLog.fromLogfile(twitterLogfile);
+        // console.log(
+        //   `twitterlog from file before git:
+        //     ${JSON.stringify(twitterLog, null, 2)}`,
+        // );
+        // let twitterLogLastSuccessfulTweetTimestamp =
+        //   twitterLog?.last_successful_tweet_timestamp?.toString();
+        // if (!twitterLogLastSuccessfulTweetTimestamp) {
+        //   twitterLogLastSuccessfulTweetTimestamp = new IsoDateString().toString();
+        // }
+        start = start
+            ? start
+            : twitterLog.last_successful_tweet_timestamp.toString();
+        stop = stop ? stop : new CveDate().toString();
+        const delta = await Delta.newDeltaFromGitHistory(start, stop, repository, true);
+        // console.log(`delta from git:  ${JSON.stringify(delta, null, 2)}`);
+        delta.new.forEach((cvep) => {
+            const ctd = CveTweetData.fromCveCorePlus(cvep);
+            twitterLog.addNew(ctd);
+        });
+        return twitterLog;
+    }
+    // ----- log operations ----- ----- ----- ----- ----- ----- ----- ----- -----
+    /**
+     * adds a CveTweetData to the newCves queue iff it is not already in the tweetedCves queue
+     * @param data a CveTweetData object
+     */
+    addNew(data) {
+        if (!this.tweetedCves.find((ctd) => ctd.cveId === data.cveId)) {
+            this.newCves.push(data);
+        }
+    }
+    // /**
+    //  * gets all untweeted CveTweetData
+    //  */
+    // getUntweeted(): CveTweetData[] {
+    //   let retval: CveTweetData[] = [];
+    //   this.newCves.forEach((item) => {
+    //     if (!item.tweeted) {
+    //       retval.push(item);
+    //     }
+    //   });
+    //   return retval;
+    // }
+    /**
+     * returns the first newCve, BUT DOES NOT REMOVE IT in case the tweet failed
+     */
+    nextNew() {
+        return this.newCves[0];
+        // return this.newCves.shift();
+    }
+    setTweeted(data) {
+        this.tweetedCves.push(data);
+    }
+    /**
+     * adds data to tweetedCves list, and removes it from the newCves list
+     * @param data the CveTweetData that was successfully tweeted
+     */
+    pushAsTweeted(data) {
+        this.newCves = this.newCves.filter((item) => item.cveId !== data.cveId);
+        this.setTweeted(data);
+        this.last_successful_tweet_timestamp = new IsoDateString();
+    }
+    /**
+     * cleans up the properties in this class:
+     * 1. move all tweeted cves from newCves to tweetedCves
+     * 2. reverse chronologically orders tweetedCves
+     * 3. remove all tweetedCves older than TWITTER_JSON_KEEP_MINS
+     */
+    cleanup() {
+        // let newlyTweetedCves = this.newCves.filter((item: CveTweetData) => {
+        //   // console.log(`item=${JSON.stringify(item)}`);
+        //   // return item.isTweeted(); // should be this, but it doesn't work???
+        //   return item.tweeted !== null;
+        // });
+        // this.newCves = this.newCves.filter((item) => {
+        //   // return !item.isTweeted();  // should be this, but it doesn't work???
+        //   return item.tweeted === null;
+        // });
+        // this.tweetedCves = [...this.tweetedCves, ...newlyTweetedCves];
+        // console.log(`newCves=${JSON.stringify(this.newCves, null, 2)}`);
+        // console.log(`tweetedCves=${JSON.stringify(this.tweetedCves, null, 2)}`);
+        // sort cves in descending order according to tweet timestamp
+        this.tweetedCves.sort((a, b) => (a.tweeted > b.tweeted ? -1 : 1));
+        // trim off cves that are older than TWITTER_JSON_KEEP_MINS
+        // const keepTimestamp = new IsoDateString().minutesAgo(
+        //   parseInt(process.env.TWITTER_JSON_KEEP_MINS),
+        // );
+        // this.tweetedCves = this.tweetedCves.filter(
+        //   (item) => item.tweeted < keepTimestamp,
+        // );
+    }
+    /** properly outputs this object in JSON.stringify() */
+    toJSON() {
+        return {
+            last_successful_tweet_timestamp: this.last_successful_tweet_timestamp?.toString(),
+            newCves: this.newCves,
+            tweetedCves: this.tweetedCves,
+        };
+    }
+    /** writes to twitter_log.json file
+     *  @param relFilepath path to write to, defaults to the same filepath that was read from
+     */
+    writeLogfile(relFilepath = null) {
+        if (!relFilepath) {
+            relFilepath = `${this.filepath}x`;
+        }
+        // clean up data structures before writing out
+        this.cleanup();
+        // console.log(`twitterLog:  ${JSON.stringify(this, null, 2)}`);
+        const dirname = external_path_default().dirname(relFilepath);
+        external_fs_default().mkdirSync(dirname, { recursive: true });
+        external_fs_default().writeFileSync(`${relFilepath}`, JSON.stringify(this, null, 2));
+    }
+}
+
+;// CONCATENATED MODULE: ./src/mitre-only/net/twitter/TwitterManager.ts
 /**
  *  Twitter activities using Twitter API v2.0
  *
@@ -83623,6 +83969,7 @@ var cjs = __nccwpck_require__(15395);
 
 
 
+
 main.config();
 class TwitterManager {
     credentials = {
@@ -83631,14 +83978,73 @@ class TwitterManager {
         accessToken: `${process.env.TWITTER_ACCESS_TOKEN}`,
         accessSecret: `${process.env.TWITTER_ACCESS_SECRET}`,
     };
+    static __cveUrl = process.env.CVE_ORG_URL;
     /** constructor */
-    constructor() {
-        console.log('Twitter constructor');
+    constructor() { }
+    /**
+     * Builds a CveTweetData object out of the parameters provided, including
+     * the trimmed version of the tweet text, built from the parameters
+     * @param cveId the CVE ID
+     * @param description the CVE description
+     * @param datePublished the published date of the CVE
+     * @returns a new CveTweetData ready to be tweeted
+     */
+    static buildCveTweetData(cveId, description, datePublished) {
+        const url = `${TwitterManager.__cveUrl}/CVERecord?id=${cveId}`;
+        const descLen = 240 - cveId.toString().length - url.length - 2;
+        let desc = description.substring(0, descLen);
+        if (desc.length < description.length) {
+            desc = `${desc.substring(0, desc.length - 1)}…`;
+        }
+        const tweetText = `${cveId} ${desc} ${url}`;
+        return new CveTweetData(cveId, description, datePublished, tweetText, null);
     }
+    async tweetNewCves() {
+        const kTwitterTestLogfile = './twitter_log.json';
+        const twitterlog = await TwitterLog.fromGit('./twitter_log.json');
+        // console.log(
+        //   `twitterlog after reading in file and git:
+        //   ${JSON.stringify(twitterlog, null, 2)}`,
+        // );
+        try {
+            const twitterClient = new cjs.TwitterApi(this.credentials);
+            let numTweeted = 0;
+            let item = twitterlog.nextNew();
+            while (item !== undefined) {
+                // untweeted.forEach(async (item) => {
+                // const item = untweeted[1];
+                const tweetData = TwitterManager.buildCveTweetData(item.cveId, item.description, item.datePublished);
+                // console.log(`tweeting ${tweetData.tweetText}`);
+                const resp = await this.tweet(tweetData.tweetText);
+                numTweeted++;
+                item.tweetText = tweetData.tweetText;
+                // item.setTweeted(); // should be this, but it doesn't work ???
+                item.tweeted = new IsoDateString();
+                twitterlog.pushAsTweeted(item);
+                item = twitterlog.nextNew();
+            }
+            // );
+            // twitterlog.cleanup()
+            twitterlog.writeLogfile(`twitter_log.json`);
+            return numTweeted;
+        }
+        catch (e) {
+            console.log(`Error from Twitter:`, e);
+            throw e;
+        }
+    }
+    /**
+     *
+     * @param content string to include in tweeet.
+     *                Note that this will automatically be trimmed to fit Twitter's text size
+     *                along with additional data required by the CVE tweet message
+     * @returns
+     */
     async tweet(content) {
         try {
             // console.log(`credentials=${JSON.stringify(this.credentials, null, 2)}`);
             const twitterClient = new cjs.TwitterApi(this.credentials);
+            console.log(`tweeting ${content}`);
             const { data: ct } = await twitterClient.v2.tweet(content);
             return {
                 id: ct.id,
@@ -83650,25 +84056,9 @@ class TwitterManager {
             throw e;
         }
     }
-    // ----- private functions ----- -----
-    // ----- ----- Output to files
-    /** writes the delta to a JSON file
-     *  @param relFilepath relative path from current directory (default is current directory)
-     */
-    writeFile(relFilepath = null) {
-        relFilepath = relFilepath
-            ? relFilepath
-            : `${process.env.CVES_BASE_DIRECTORY}/twitter.json`;
-        // console.log(`relFilepath=${relFilepath}`);
-        const dirname = external_path_default().dirname(relFilepath);
-        external_fs_default().mkdirSync(dirname, { recursive: true });
-        external_fs_default().writeFileSync(`${relFilepath}`, JSON.stringify(this, null, 2));
-        console.log(`delta file written to ${relFilepath}`);
-    }
 }
 
 ;// CONCATENATED MODULE: ./src/mitre-only/commands/TwitterCommand.ts
-
 
 
 /** Command to tweet newly published CVEs */
@@ -83684,13 +84074,20 @@ class TwitterCommand extends GenericCommand {
     async run(options) {
         super.prerun({ display: true, ...options });
         // const delta = Delta.newDeltaFromGitHistory(CveDate.toISOString(CveDate.getMidnight()))
-        const delta = await Delta.newDeltaFromGitHistory(`2023-04-25T00:00:00.000Z`);
-        console.log(`delta:  ${delta.toText()}`);
-        console.log(`delta.new=${JSON.stringify(delta.new, null, 2)}`);
+        // const delta = await Delta.newDeltaFromGitHistory(
+        //   `2023-04-25T00:00:00.000Z`,
+        // );
+        // console.log(`delta:  ${delta.toText()}`);
+        // console.log(`delta.new=${JSON.stringify(delta.new, null, 2)}`);
         const twitter = new TwitterManager();
         const date = new Date().toISOString();
-        const resp = await twitter.tweet(`Hello World from NodeJS at ${date}!`);
-        console.log(`resp=${JSON.stringify(resp, null, 2)}`);
+        const numTweets = await twitter.tweetNewCves();
+        if (numTweets === 0) {
+            console.log(`there are no new CVEs to tweet at this time.`);
+        }
+        else {
+            console.log(`tweeted ${numTweets}`);
+        }
         super.postrun({ display: true });
     }
 }
