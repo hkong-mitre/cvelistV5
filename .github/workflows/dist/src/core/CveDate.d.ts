@@ -22,7 +22,7 @@ export declare class CveDate {
     /** the constructor only creates a new CveDate based on an ISO date string
      *  @param isoDateStr a string represenation of a date in ISO/UTC/Z format
      *                    defaults to "now"
-    */
+     */
     constructor(isoDateStr?: IsoDateString | string);
     /** returns this as an ISO/UTC/Z date string */
     asIsoDateString(): IsoDateString;

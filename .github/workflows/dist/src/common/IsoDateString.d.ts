@@ -9,6 +9,7 @@
 export declare const IsoDateStringRegEx: RegExp;
 export declare class IsoDateString {
     _isoDateString: string;
+    _date: Date;
     /** returns a IsoDateString object iff isoDateStr is a properly formatted ISO Date+Time+TZ string,
      *  or if a string is not specified, then this will create a IsoDateString of "now" using new Date()
      *  @param isoDateStr a properly formatted ISO Date+Time+TZ string (defaults to now)
@@ -16,6 +17,8 @@ export declare class IsoDateString {
      *                 this is needed because CVEs timestamps may be missing the timezone, and we are assuming it to be GMT
      */
     constructor(isoDateStr?: string, assumeZ?: boolean);
+    static fromDate(date: Date): IsoDateString;
+    static fromTicks(ticks1970: number): IsoDateString;
     /** returns the number of characters in the string representation */
     length(): number;
     /** returns the string representation */
@@ -31,5 +34,17 @@ export declare class IsoDateString {
      * @param minutes positive number to minutes ago, negative number for minutes since
      * @returns a new IsoDateString that is specified minutes ago or since
      */
-    minutesAgo(minutes: number): IsoDateString;
+    minutesAgo(minutes: number | string): IsoDateString;
+    /**
+     * return a new IsoDateString that is hours ago or since
+     * @param hours positive number to hours ago, negative number for hours since
+     * @returns a new IsoDateString that is specified hours ago or since
+     */
+    hoursAgo(hours: number | string): IsoDateString;
+    /**
+     * return a new IsoDateString that is days ago or since
+     * @param days positive number to days ago, negative number for days since
+     * @returns a new IsoDateString that is specified days ago or since
+     */
+    daysAgo(days: number | string): IsoDateString;
 }
