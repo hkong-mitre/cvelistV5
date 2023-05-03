@@ -1,7 +1,6 @@
 import { IsoDateString } from '../../../common/IsoDateString.js';
 import { CveTweetData } from './CveTweetData.js';
 export declare class TwitterLog {
-    static kFilename: string;
     filepath: string;
     last_successful_tweet_timestamp: IsoDateString;
     newCves: CveTweetData[];
@@ -9,16 +8,15 @@ export declare class TwitterLog {
     private constructor();
     /** reads in the recent activities into _activities */
     static fromLogfile(relFilepath: string): TwitterLog;
-    /** using Git and TwitterLog.kFilename, build up a new TwitterLog
+    /** using Git and twitter_log.json, build up a new TwitterLog
      * @param start git log start time window
      * @param stop git log stop time window (defaults to now)
      * @param repository directory to get git info from (defaults to process.env.CVES_BASE_DIRECTORY)
-     * @param twitterLogfile the path to the twitterlog file (defaults to TwitterLog.kFilename)
+     * @param twitterLogfile the path to the twitterlog file (defaults to ./twitter_log.json)
      */
     static fromGit(twitterLogfile?: string, repository?: string, start?: string, stop?: string): Promise<TwitterLog>;
     /**
-     * adds a CveTweetData to the newCves queue iff it is not already in
-     *  either the newCves nor the tweetedCves queues
+     * adds a CveTweetData to the newCves queue iff it is not already in the tweetedCves queue
      * @param data a CveTweetData object
      */
     addNew(data: CveTweetData): void;
@@ -45,7 +43,7 @@ export declare class TwitterLog {
         newCves: CveTweetData[];
         tweetedCves: CveTweetData[];
     };
-    /** writes to TwitterLog.kFilename file
+    /** writes to twitter_log.json file
      *  @param relFilepath path to write to, defaults to the same filepath that was read from
      */
     writeLogfile(relFilepath?: string): void;

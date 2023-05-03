@@ -17,8 +17,18 @@ export declare class IsoDateString {
      *                 this is needed because CVEs timestamps may be missing the timezone, and we are assuming it to be GMT
      */
     constructor(isoDateStr?: string, assumeZ?: boolean);
+    /**
+     * builds an IsoDateString using a Javascript Date object
+     * @param date a JavaScript Date object
+     * @returns an IsoDateString
+     */
     static fromDate(date: Date): IsoDateString;
-    static fromTicks(ticks1970: number): IsoDateString;
+    /**
+     * builds an IsoDateString using the number of seconds since 1/1/1970
+     * @param secsSince1970 number representing seconds since 1/1/1970
+     * @returns an IsoDateString
+     */
+    static fromNumber(secsSince1970: number): IsoDateString;
     /** returns the number of characters in the string representation */
     length(): number;
     /** returns the string representation */
