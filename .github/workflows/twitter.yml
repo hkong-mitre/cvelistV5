@@ -51,27 +51,18 @@ jobs:
           skip_unpack: true
           if_no_artifact_found: ignore
         # actions/download-artifact@v3 does not work, so using dawidd6/action-download-artifact@v2
-#        uses: actions/download-artifact@v3
-#         with:
-#           name: twitter_log.json
+        # uses: actions/download-artifact@v3
+        # with:
+        #   name: twitter_log.json
           
       - name: tweet
         if: success() || failure()
         run: |
-          ls -al
-          # mv twitter_log2.json twitter_log.json
-          # cat twitter_log.json
           unzip twitterlog.zip
-          node ./.github/workflows/dist/index.js twitter ${{ github.event.inputs.params }}
-          
-          # prep uploading twitter_log.json
           ls -al
-          cat twitter_log.json
-          #mkdir -p ~/gha_artifacts
-          #mv twitter_log.json ~/gha_artifacts/twitter_log.json
+          node ./.github/workflows/dist/index.js twitter ${{ github.event.inputs.params }}          
+          ls -al
           zip twitterlog.zip ./twitter_log.json
-          ls -al
-          #ls -al ~/gha_artifacts
           
       - name: Upload twitter_log.json
         if: success() || failure()
