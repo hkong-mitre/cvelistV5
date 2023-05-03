@@ -77805,6 +77805,10 @@ class FsUtils {
 
 class CveCorePlus extends CveCore {
     description;
+    /** optional field for storing timestamp when the update github action added
+     *  this to the repository
+     */
+    // timestampWhenCachedOnGithub?: IsoDateString; //xxxxx
     // ----- constructors and factories ----- ----- ----- ----- -----
     /**
      * constructor which builds a minimum CveCore from a CveId or string
@@ -77829,6 +77833,11 @@ class CveCorePlus extends CveCore {
         return obj;
     }
     // ----- accessors and mutators ----- ----- ----- -----
+    /**
+     * update CveCorePlus with additional data from the repository
+     * @returns true iff a JSON file was found and readable to fill in
+     * ALL the fields in the CveCorePlus data structure
+     */
     updateFromLocalRepository() {
         const filepath = `${this.cveId.getFullCvePath()}.json`;
         // console.log(`filepath=${filepath}`);
@@ -77841,6 +77850,7 @@ class CveCorePlus extends CveCore {
                 this.set(json['cveMetadata']);
                 this.description =
                     json['containers']['cna']['descriptions'][0]['value'];
+                // this.timestampWhenCachedOnGithub = undefined; //xxxxx
             }
             return true;
         }
@@ -78227,7 +78237,7 @@ class Delta /*implements DeltaProps*/ {
      */
     writeCves(relDir = undefined, zipFile = undefined) {
         const pwd = external_process_default().cwd();
-        relDir = relDir ? relDir : `${pwd}/deltas`;
+        relDir = relDir ? relDir : __nccwpck_require__.ab + "deltas";
         external_fs_default().mkdirSync(relDir, { recursive: true });
         console.log(`copying changed CVEs to ${relDir}`);
         this.new.forEach((item) => {
@@ -84086,7 +84096,7 @@ class TwitterManager {
                 const tweetData = CveTweetData.buildCveTweetData(item.cveId, item.description, item.datePublished);
                 try {
                     console.log(`tweeting ${tweetData.tweetText}`);
-                    // const resp = await this.tweet(tweetData.tweetText);
+                    const resp = await this.tweet(tweetData.tweetText);
                     numTweeted++;
                     item.tweetText = tweetData.tweetText;
                     // the following line sometimes does not work, in which case, the second line can be used
