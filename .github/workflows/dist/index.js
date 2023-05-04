@@ -77805,6 +77805,10 @@ class FsUtils {
 
 class CveCorePlus extends CveCore {
     description;
+    /** optional field for storing timestamp when the update github action added
+     *  this to the repository
+     */
+    // timestampWhenCachedOnGithub?: IsoDateString; //xxxxx
     // ----- constructors and factories ----- ----- ----- ----- -----
     /**
      * constructor which builds a minimum CveCore from a CveId or string
@@ -77829,6 +77833,11 @@ class CveCorePlus extends CveCore {
         return obj;
     }
     // ----- accessors and mutators ----- ----- ----- -----
+    /**
+     * update CveCorePlus with additional data from the repository
+     * @returns true iff a JSON file was found and readable to fill in
+     * ALL the fields in the CveCorePlus data structure
+     */
     updateFromLocalRepository() {
         const filepath = `${this.cveId.getFullCvePath()}.json`;
         // console.log(`filepath=${filepath}`);
@@ -77841,6 +77850,7 @@ class CveCorePlus extends CveCore {
                 this.set(json['cveMetadata']);
                 this.description =
                     json['containers']['cna']['descriptions'][0]['value'];
+                // this.timestampWhenCachedOnGithub = undefined; //xxxxx
             }
             return true;
         }
@@ -78227,7 +78237,7 @@ class Delta /*implements DeltaProps*/ {
      */
     writeCves(relDir = undefined, zipFile = undefined) {
         const pwd = external_process_default().cwd();
-        relDir = relDir ? relDir : `${pwd}/deltas`;
+        relDir = relDir ? relDir : __nccwpck_require__.ab + "deltas";
         external_fs_default().mkdirSync(relDir, { recursive: true });
         console.log(`copying changed CVEs to ${relDir}`);
         this.new.forEach((item) => {
@@ -83945,16 +83955,16 @@ class TwitterLog {
      */
     static async fromGit(twitterLogfile = null, repository = null, start = null, stop = null) {
         const twitterLog = TwitterLog.fromLogfile(twitterLogfile);
-        // console.log(
-        //   `fromGit:twitterlog from file before git:
-        //     ${JSON.stringify(twitterLog, null, 2)}`,
-        // );
         // let twitterLogLastSuccessfulTweetTimestamp =
         //   twitterLog?.last_successful_tweet_timestamp?.toString();
         // if (!twitterLogLastSuccessfulTweetTimestamp) {
         //   twitterLogLastSuccessfulTweetTimestamp = new IsoDateString().toString();
         // }
-        start = start ?? twitterLog.last_successful_tweet_timestamp.toString();
+        // start is either whatever was specified,
+        // or the last successful_tweet_timestamp - 30 minutes
+        start =
+            start ??
+                twitterLog.last_successful_tweet_timestamp.minutesAgo(30).toString();
         stop = stop ?? new CveDate().toString();
         const delta = await Delta.newDeltaFromGitHistory(start, stop, repository, true);
         // console.log(`delta from git:  ${JSON.stringify(delta, null, 2)}`);
@@ -84086,7 +84096,7 @@ class TwitterManager {
                 const tweetData = CveTweetData.buildCveTweetData(item.cveId, item.description, item.datePublished);
                 try {
                     console.log(`tweeting ${tweetData.tweetText}`);
-                    // const resp = await this.tweet(tweetData.tweetText);
+                    const resp = await this.tweet(tweetData.tweetText);
                     numTweeted++;
                     item.tweetText = tweetData.tweetText;
                     // the following line sometimes does not work, in which case, the second line can be used
@@ -84132,20 +84142,26 @@ class TwitterManager {
         }
     }
     static async findUntweeted(start, stop, dir) {
-        const twitterLog = await TwitterLog.fromLogfile(TwitterLog.kFilename);
-        const delta = await Delta.newDeltaFromGitHistory(start.toString(), stop.toString(), dir, true);
-        delta.new.forEach((cve) => {
-            const found = twitterLog.tweetedCves.find((item) => {
-                return cve.cveId.toString() == item.cveId.toString();
+        try {
+            const twitterLog = await TwitterLog.fromLogfile(TwitterLog.kFilename);
+            const delta = await Delta.newDeltaFromGitHistory(start.toString(), stop.toString(), dir, true);
+            delta.new.forEach((cve) => {
+                const found = twitterLog.tweetedCves.find((item) => {
+                    return cve.cveId.toString() == item.cveId.toString();
+                });
+                if (!found) {
+                    const ctd = new CveTweetData(cve.cveId);
+                    ctd.detail = cve;
+                    twitterLog.addNew(ctd);
+                }
             });
-            if (!found) {
-                const ctd = new CveTweetData(cve.cveId);
-                ctd.detail = cve;
-                twitterLog.addNew(ctd);
-            }
-        });
-        const retval = (0,lodash.cloneDeep)(twitterLog.newCves);
-        return retval;
+            const retval = (0,lodash.cloneDeep)(twitterLog.newCves);
+            return retval;
+        }
+        catch (e) {
+            console.log(`there was an error:  ${e}`);
+            return [];
+        }
     }
 }
 
