@@ -77852,8 +77852,11 @@ class CveCorePlus extends CveCore {
                 json = JSON.parse(str);
                 // console.log(`json=${JSON.stringify(json, null, 2)}`);
                 this.set(json['cveMetadata']);
-                this.description =
-                    json['containers']['cna']['descriptions'][0]['value'];
+                this.description = '';
+                const descriptionsArray = json['containers']['cna']['descriptions'];
+                if (descriptionsArray && descriptionsArray.length > 0) {
+                    this.description = descriptionsArray.filter(item => item['lang'] === 'en')[0]['value'];
+                }
                 // this.timestampWhenCachedOnGithub = undefined; //xxxxx
             }
             return true;
