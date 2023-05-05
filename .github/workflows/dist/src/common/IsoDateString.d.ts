@@ -29,6 +29,7 @@ export declare class IsoDateString {
      * @returns an IsoDateString
      */
     static fromNumber(secsSince1970: number): IsoDateString;
+    static fromIsoDateString(isoDateStr: IsoDateString): IsoDateString;
     /** returns the number of characters in the string representation */
     length(): number;
     /** returns the string representation */

@@ -73113,7 +73113,7 @@ class IsoDateString {
         if (!isoDateStr) {
             isoDateStr = new Date().toISOString();
         }
-        if (isoDateStr[isoDateStr.length] !== 'Z' && assumeZ) {
+        if (isoDateStr[isoDateStr.length - 1] !== 'Z' && assumeZ) {
             isoDateStr = `${isoDateStr}Z`;
         }
         if (IsoDateString.isIsoDateString(isoDateStr)) {
@@ -73139,6 +73139,10 @@ class IsoDateString {
      */
     static fromNumber(secsSince1970) {
         return IsoDateString.fromDate(new Date(secsSince1970));
+    }
+    static fromIsoDateString(isoDateStr) {
+        const iso = new IsoDateString(isoDateStr.toString());
+        return iso;
     }
     /** returns the number of characters in the string representation */
     length() {
@@ -83808,30 +83812,38 @@ class CveTweetData {
         this._description = str;
     }
     _tweetText;
-    /** buld the tweetText iff one has not already been set */
+    /** returns the tweet text */
     get tweetText() {
-        if (this._tweetText === undefined) {
-            // const ctd = CveTweetData.buildCveTweetData(
-            //   this.cveId,
-            //   this.description,
-            //   this.datePublished,
-            // );
-            // this._tweetText = ctd.tweetText;
-            const maxTwitterChars = 230; // override the actual 240 for safety
-            const url = `${TwitterManager.__cveUrl}/CVERecord?id=${this.cveId}`;
-            const descLen = maxTwitterChars - this.cveId.toString().length - url.length - 2;
-            let desc = this.description.substring(0, descLen);
-            if (desc.length < this.description.length) {
-                desc = `${desc.substring(0, desc.length - 1)}…`;
-            }
-            this._tweetText = `${this.cveId} ${desc} ${url}`;
-            return this._tweetText;
-        }
+        // if (this._tweetText === undefined) {
+        //   // const ctd = CveTweetData.buildCveTweetData(
+        //   //   this.cveId,
+        //   //   this.description,
+        //   //   this.datePublished,
+        //   // );
+        //   // this._tweetText = ctd.tweetText;
+        //   const maxTwitterChars = 230; // override the actual 240 for safety
+        //   const url = `${TwitterManager.__cveUrl}/CVERecord?id=${this.cveId}`;
+        //   const descLen =
+        //     maxTwitterChars - this.cveId.toString().length - url.length - 2;
+        //   let desc: string = this.description?.substring(0, descLen);
+        //   if (desc.length < this.description?.length) {
+        //     desc = `${desc.substring(0, desc.length - 1)}…`;
+        //   }
+        //   this._tweetText = `${this.cveId} ${desc} ${url}`;
+        //   return this._tweetText;
+        // }
         // console.log(`this._tweetText=${JSON.stringify(this._tweetText)}`);
         return this._tweetText;
     }
+    /** sets the tweetText, overwriting what was already built in the constructor
+     * @param str the tweet text
+     */
     set tweetText(str) {
         this._tweetText = str;
+    }
+    buildTweetText() {
+        this._tweetText = CveTweetData.buildCveTweetText(this.cveId, this._description, this.datePublished);
+        return this._tweetText;
     }
     // useful for detailed logging
     detail;
@@ -83848,11 +83860,12 @@ class CveTweetData {
         this.cveId = cveId;
         this.description = description;
         this.datePublished = datePublished;
-        this.tweetText = tweetText;
+        this.tweetText = tweetText ?? CveTweetData.buildCveTweetText(this.cveId, this.description, this.datePublished);
         this.tweeted = tweeted;
     }
+    /** builds a CveTweetData from a CveCorePlus object */
     static fromCveCorePlus(cvep) {
-        const ctd = new CveTweetData(cvep.cveId, cvep.description, new IsoDateString(cvep.datePublished, true));
+        const ctd = new CveTweetData(cvep.cveId, cvep.description, cvep.datePublished ? new IsoDateString(cvep.datePublished, true) : undefined);
         return ctd;
     }
     /**
@@ -83861,28 +83874,38 @@ class CveTweetData {
      * @param cveId the CVE ID
      * @param description the CVE description
      * @param datePublished the published date of the CVE
-     * @returns a new CveTweetData ready to be tweeted
+     * @returns a string ready to be tweeted
      */
-    static buildCveTweetData(cveId, description, datePublished) {
-        // const maxTwitterChars = 230; // override the actual 240 for safety
-        // const url = `${TwitterManager.__cveUrl}/CVERecord?id=${cveId}`;
-        // const descLen = maxTwitterChars - cveId.toString().length - url.length - 2;
-        // let desc: string = description.substring(0, descLen);
-        // if (desc.length < description.length) {
-        //   desc = `${desc.substring(0, desc.length - 1)}…`;
-        // }
-        // const tweetText = `${cveId} ${desc} ${url}`;
-        const ctd = new CveTweetData(cveId, description, datePublished, undefined, undefined);
-        ctd.tweetText; // getting the tweetText sets it
-        return ctd;
+    static buildCveTweetText(cveId, description, datePublished) {
+        const maxTwitterChars = 230; // override the actual 240 for safety
+        const url = `${TwitterManager.__cveUrl}/CVERecord?id=${cveId}`;
+        const descLen = maxTwitterChars - cveId.toString().length - url.length - 2;
+        if (!description) {
+            description = '';
+        }
+        let desc = description.substring(0, descLen);
+        if (desc.length < description.length) {
+            desc = `${desc.substring(0, desc.length - 1)}…`;
+        }
+        const tweetText = `${cveId} ${desc} ${url}`;
+        return tweetText;
+        // const ctd = new CveTweetData(
+        //   cveId,
+        //   description,
+        //   datePublished,
+        //   undefined,
+        //   undefined, // keep blank until tweet is successfully completed
+        // );
+        // ctd.tweetText; // getting the tweetText sets it
+        // return ctd;
     }
-    toJson() {
+    toJSON() {
         return {
-            cveId: this.cveId,
+            cveId: this.cveId.toJSON(),
             description: this.description,
-            datePublished: this.datePublished.toString(),
+            datePublished: this.datePublished.toJSON(),
             tweetText: this.tweetText,
-            tweeted: this.tweeted.toString(),
+            tweeted: this.tweeted.toJSON(),
         };
     }
     /**
@@ -83962,9 +83985,9 @@ class TwitterLog {
         // }
         // start is either whatever was specified,
         // or the last successful_tweet_timestamp - 30 minutes
-        start =
-            start ??
-                twitterLog.last_successful_tweet_timestamp.minutesAgo(30).toString();
+        console.log(`twitterLog.last_successful_tweet_timestamp=${twitterLog.last_successful_tweet_timestamp}`);
+        const lastTwitterTimestamp = IsoDateString.fromIsoDateString(twitterLog.last_successful_tweet_timestamp);
+        start = start ? start : lastTwitterTimestamp.minutesAgo(30).toString();
         stop = stop ?? new CveDate().toString();
         const delta = await Delta.newDeltaFromGitHistory(start, stop, repository, true);
         // console.log(`delta from git:  ${JSON.stringify(delta, null, 2)}`);
@@ -84093,12 +84116,16 @@ class TwitterManager {
             let item = twitterlog.nextNew();
             let twitterApiFailed = false;
             while (!twitterApiFailed && item !== undefined) {
-                const tweetData = CveTweetData.buildCveTweetData(item.cveId, item.description, item.datePublished);
+                item.buildTweetText();
+                // const tweetData = CveTweetData.buildCveTweetData(
+                //   item.cveId,
+                //   item.description,
+                //   item.datePublished,
+                // );
                 try {
-                    console.log(`tweeting ${tweetData.tweetText}`);
-                    const resp = await this.tweet(tweetData.tweetText);
+                    console.log(`tweeting ${item.tweetText}`);
+                    const resp = await this.tweet(item.tweetText);
                     numTweeted++;
-                    item.tweetText = tweetData.tweetText;
                     // the following line sometimes does not work, in which case, the second line can be used
                     item.setTweeted();
                     // item.tweeted = new IsoDateString();

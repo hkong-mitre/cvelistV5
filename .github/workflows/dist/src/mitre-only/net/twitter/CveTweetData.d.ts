@@ -9,9 +9,13 @@ export declare class CveTweetData {
     get description(): string;
     set description(str: string);
     private _tweetText;
-    /** buld the tweetText iff one has not already been set */
+    /** returns the tweet text */
     get tweetText(): string;
+    /** sets the tweetText, overwriting what was already built in the constructor
+     * @param str the tweet text
+     */
     set tweetText(str: string);
+    buildTweetText(): string;
     detail: CveCorePlus;
     /**
      * constructs a CveTweetData
@@ -21,7 +25,8 @@ export declare class CveTweetData {
      * @param tweetText calculated or copied text to be tweeted
      * @param tweeted calcuated or copied timestamp when tweeted
      */
-    constructor(cveId: CveId, description?: string, datePublished?: IsoDateString, tweetText?: string, tweeted?: IsoDateString);
+    constructor(cveId: CveId, description?: string, datePublished?: IsoDateString | undefined, tweetText?: string, tweeted?: IsoDateString);
+    /** builds a CveTweetData from a CveCorePlus object */
     static fromCveCorePlus(cvep: CveCorePlus): CveTweetData;
     /**
      * Builds a CveTweetData object out of the parameters provided, including
@@ -29,11 +34,11 @@ export declare class CveTweetData {
      * @param cveId the CVE ID
      * @param description the CVE description
      * @param datePublished the published date of the CVE
-     * @returns a new CveTweetData ready to be tweeted
+     * @returns a string ready to be tweeted
      */
-    static buildCveTweetData(cveId: CveId, description: string, datePublished: IsoDateString): CveTweetData;
-    toJson(): {
-        cveId: CveId;
+    static buildCveTweetText(cveId: CveId, description: string, datePublished: IsoDateString): string;
+    toJSON(): {
+        cveId: string;
         description: string;
         datePublished: string;
         tweetText: string;
