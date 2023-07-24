@@ -24,6 +24,7 @@ export declare class TwitterManager {
     /** constructor */
     private constructor();
     static tweetNewCves(): Promise<number>;
+    static setTweeterLogDate(date: IsoDateString): Promise<IsoDateString>;
     /**
      *
      * @param content string to include in tweeet.

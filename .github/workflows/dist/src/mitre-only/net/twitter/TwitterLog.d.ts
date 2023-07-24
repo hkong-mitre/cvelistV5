@@ -8,7 +8,7 @@ export declare class TwitterLog {
     tweetedCves: CveTweetData[];
     private constructor();
     /** reads in the recent activities into _activities */
-    static fromLogfile(relFilepath: string): TwitterLog;
+    static fromLogfile(relFilepath?: string): TwitterLog;
     /** using Git and TwitterLog.kFilename, build up a new TwitterLog
      * @param start git log start time window
      * @param stop git log stop time window (defaults to now)
@@ -39,6 +39,10 @@ export declare class TwitterLog {
      * @param timestamp the ISO timestamp before which CVEs tweeted will be removed
      */
     cleanup(timestamp?: IsoDateString): void;
+    /**
+     * resets the 'last_successful_tweet_timestamp' to the specified ISO date
+     */
+    setLogDate(date?: IsoDateString): void;
     /** properly outputs this object in JSON.stringify() */
     toJSON(): {
         last_successful_tweet_timestamp: string;

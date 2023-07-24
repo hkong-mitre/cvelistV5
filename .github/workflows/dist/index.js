@@ -71701,13 +71701,13 @@ dotenv__WEBPACK_IMPORTED_MODULE_0__.config();
  *  The format follows semver for released software: Major.Minor.Patch, e.g., `1.0.0`
  *  However before release, it only uses the GitHub Project sprint number, e.g., `Sprint-1`
  */
-const version = (/* unused pure expression or super */ null && (`Sprint-0`));
+const version = `0.9+twitter-2023-07-24`;
 // import { MainCommands } from './commands/MainCommands.js';
 // const program = new MainCommands(version);
-// ----- MITRE-only ----- ----- ---- 
+// ----- MITRE-only ----- ----- ----
 
-const program = new _mitre_only_commands_MitreOnlyCommands_js__WEBPACK_IMPORTED_MODULE_1__/* .MitreOnlyCommands */ .F(`Sprint-0`);
-// ----- MITRE-only ----- ----- ---- 
+const program = new _mitre_only_commands_MitreOnlyCommands_js__WEBPACK_IMPORTED_MODULE_1__/* .MitreOnlyCommands */ .F(version);
+// ----- MITRE-only ----- ----- ----
 await program.run();
 
 __webpack_async_result__();
@@ -83921,7 +83921,7 @@ class CveTweetData {
             description: this.description,
             datePublished: this.datePublished.toJSON(),
             tweetText: this.tweetText,
-            tweeted: this.tweeted.toJSON(),
+            tweeted: this.tweeted?.toJSON(),
         };
     }
     /**
@@ -83954,16 +83954,17 @@ class TwitterLog {
     tweetedCves;
     // ----- constructors and factory functions ----- ----- ----- ----- ----- ----- ----- ----- -----
     constructor() {
-        this.last_successful_tweet_timestamp = new IsoDateString();
+        this.setLogDate();
         this.newCves = [];
         this.tweetedCves = [];
     }
     /** reads in the recent activities into _activities */
     static fromLogfile(relFilepath) {
         const twitterLog = new TwitterLog();
+        relFilepath = relFilepath ?? `./${TwitterLog.kFilename}`;
         twitterLog.filepath = relFilepath;
-        if (!external_fs_default().existsSync(relFilepath)) {
-            console.log(`twitter log file not found:  ${relFilepath}`);
+        if (!external_fs_default().existsSync(twitterLog.filepath)) {
+            console.log(`twitter log file not found:  ${twitterLog.filepath}`);
         }
         else {
             let json = [];
@@ -84029,9 +84030,10 @@ class TwitterLog {
      */
     nextNew() {
         return this.newCves[0];
-        // return this.newCves.shift();
     }
     setTweeted(data) {
+        data.tweeted = new IsoDateString();
+        // this.newCves.shift();
         this.tweetedCves.push(data);
     }
     /**
@@ -84041,7 +84043,7 @@ class TwitterLog {
     pushAsTweeted(data) {
         this.newCves = this.newCves.filter((item) => item.cveId !== data.cveId);
         this.setTweeted(data);
-        this.last_successful_tweet_timestamp = new IsoDateString();
+        this.setLogDate(new IsoDateString());
     }
     /**
      * cleans up the log:
@@ -84059,6 +84061,15 @@ class TwitterLog {
             this.tweetedCves = this.tweetedCves.filter((item) => item.tweeted < keepTimestamp);
         }
     }
+    /**
+     * resets the 'last_successful_tweet_timestamp' to the specified ISO date
+     */
+    setLogDate(date) {
+        if (!date) {
+            date = new IsoDateString();
+        }
+        this.last_successful_tweet_timestamp = date;
+    }
     /** properly outputs this object in JSON.stringify() */
     toJSON() {
         return {
@@ -84072,7 +84083,7 @@ class TwitterLog {
      */
     writeLogfile(relFilepath = null) {
         if (!relFilepath) {
-            relFilepath = `${this.filepath}x`;
+            relFilepath = `${this.filepath}`;
         }
         // clean up data structures before writing out
         this.cleanup();
@@ -84118,7 +84129,10 @@ class TwitterManager {
             let item = twitterlog.nextNew();
             let twitterApiFailed = false;
             while (!twitterApiFailed && item !== undefined) {
-                item.buildTweetText();
+                console.log(`item=${JSON.stringify(item, null, 2)}`);
+                if (!item.tweetText) {
+                    item.buildTweetText();
+                }
                 // const tweetData = CveTweetData.buildCveTweetData(
                 //   item.cveId,
                 //   item.description,
@@ -84129,18 +84143,32 @@ class TwitterManager {
                     const resp = await this.tweet(item.tweetText);
                     numTweeted++;
                     // the following line sometimes does not work, in which case, the second line can be used
-                    item.setTweeted();
+                    // item.setTweeted();
                     // item.tweeted = new IsoDateString();
                     twitterlog.pushAsTweeted(item);
+                    twitterlog.writeLogfile();
                     item = twitterlog.nextNew();
                 }
                 catch (e) {
+                    console.log(`error:  `, e);
                     twitterApiFailed = true;
                 }
             }
             // twitterlog.cleanup()
-            twitterlog.writeLogfile(`${TwitterLog.kFilename}`);
+            // twitterlog.writeLogfile(`${TwitterLog.kFilename}`);
             return numTweeted;
+        }
+        catch (e) {
+            console.log(`Error from Twitter:`, e);
+            throw e;
+        }
+    }
+    static async setTweeterLogDate(date) {
+        try {
+            const twitterlog = await TwitterLog.fromLogfile();
+            twitterlog.setLogDate(date);
+            twitterlog.writeLogfile();
+            return twitterlog.last_successful_tweet_timestamp;
         }
         catch (e) {
             console.log(`Error from Twitter:`, e);
@@ -84171,12 +84199,16 @@ class TwitterManager {
         }
     }
     static async findUntweeted(start, stop, dir) {
-        try {
-            const twitterLog = await TwitterLog.fromLogfile(TwitterLog.kFilename);
-            const delta = await Delta.newDeltaFromGitHistory(start.toString(), stop.toString(), dir, true);
+        // try {
+        const twitterLog = await TwitterLog.fromLogfile(TwitterLog.kFilename);
+        const delta = await Delta.newDeltaFromGitHistory(start?.toString(), stop?.toString(), dir, true);
+        let retval = [];
+        if (delta.new.length > 0) {
             delta.new.forEach((cve) => {
+                console.log(`cve = ${JSON.stringify(cve)}`);
                 const found = twitterLog.tweetedCves.find((item) => {
-                    return cve.cveId.toString() == item.cveId.toString();
+                    console.log(`item = ${JSON.stringify(item)}`);
+                    return cve?.cveId?.toString() == item?.cveId?.toString();
                 });
                 if (!found) {
                     const ctd = new CveTweetData(cve.cveId);
@@ -84184,13 +84216,13 @@ class TwitterManager {
                     twitterLog.addNew(ctd);
                 }
             });
-            const retval = (0,lodash.cloneDeep)(twitterLog.newCves);
-            return retval;
+            retval = (0,lodash.cloneDeep)(twitterLog.newCves);
         }
-        catch (e) {
-            console.log(`there was an error:  ${e}`);
-            return [];
-        }
+        return retval;
+        // } catch (e) {
+        //   console.log(`there was an error:  ${e}`);
+        //   return [];
+        // }
     }
 }
 
@@ -84212,8 +84244,9 @@ class TwitterCommand extends GenericCommand {
             //   'truncates the twitter_log file, removing everything before the specified ISO date, defaults to now',
             //   new IsoDateString().toString(),
             // )
-            .option('--show-untweeted', 'show CVEs that should have been tweeted but was not')
-            .option('--start <ISO date>', `specific start window, overrides any specifications from --minutes-ago`)
+            .option('--set-log-date <ISO date>', `sets the log date ('last_successful_tweet_timestamp')`)
+            .option('--show-untweeted', 'show CVEs that should have been tweeted but was not, requires --start')
+            .option('--start <ISO date>', `start window`)
             .option('--stop <ISO date>', 'stop window, defaults to now', now.toISOString())
             .action(this.run);
     }
@@ -84227,6 +84260,10 @@ class TwitterCommand extends GenericCommand {
             untweetedCves.forEach((element, index) => {
                 console.log(` ${index + 1}: ${element.cveId}: `);
             });
+        }
+        else if (options.setLogDate) {
+            const date = await TwitterManager.setTweeterLogDate(options.setLogDate);
+            console.log(`changed 'last_successful_tweet_timestamp' to ${date}`);
         }
         // ----- --reset-log-to
         // else if (options.truncateLogTo) {
