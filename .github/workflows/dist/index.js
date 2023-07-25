@@ -73152,6 +73152,12 @@ class IsoDateString {
     toString() {
         return this._isoDateString;
     }
+    /**
+     * @returns a number representing the number of millisecs since 1970-01-01T00:00:00.000Z
+     */
+    toNumber() {
+        return this._date.getTime();
+    }
     /** properly outputs the object in JSON.stringify() */
     toJSON() {
         return this.toString();
@@ -77743,7 +77749,7 @@ class FsUtils {
      * @returns true iff the specified path exists
      */
     static exists(path) {
-        console.log(`checking that "${path}" exists in the file system`);
+        // console.log(`checking that "${path}" exists in the file system`);
         const exists = (0,external_fs_.existsSync)(path);
         return exists;
     }
@@ -83949,9 +83955,15 @@ class CveTweetData {
 class TwitterLog {
     static kFilename = 'twitter_log.json';
     filepath = undefined;
-    last_successful_tweet_timestamp;
     newCves;
     tweetedCves;
+    _last_successful_tweet_timestamp;
+    get last_successful_tweet_timestamp() {
+        return this._last_successful_tweet_timestamp;
+    }
+    set last_successful_tweet_timestamp(value) {
+        this._last_successful_tweet_timestamp = value;
+    }
     // ----- constructors and factory functions ----- ----- ----- ----- ----- ----- ----- ----- -----
     constructor() {
         this.setLogDate();
@@ -83965,6 +83977,7 @@ class TwitterLog {
         twitterLog.filepath = relFilepath;
         if (!external_fs_default().existsSync(twitterLog.filepath)) {
             console.log(`twitter log file not found:  ${twitterLog.filepath}`);
+            console.log(`  generating a new (empty) twitter log file`);
         }
         else {
             let json = [];
@@ -84129,7 +84142,7 @@ class TwitterManager {
             let item = twitterlog.nextNew();
             let twitterApiFailed = false;
             while (!twitterApiFailed && item !== undefined) {
-                console.log(`item=${JSON.stringify(item, null, 2)}`);
+                // console.log(`item=${JSON.stringify(item,null,2)}`)
                 if (!item.tweetText) {
                     item.buildTweetText();
                 }
@@ -84205,9 +84218,9 @@ class TwitterManager {
         let retval = [];
         if (delta.new.length > 0) {
             delta.new.forEach((cve) => {
-                console.log(`cve = ${JSON.stringify(cve)}`);
+                // console.log(`cve = ${JSON.stringify(cve)}`)
                 const found = twitterLog.tweetedCves.find((item) => {
-                    console.log(`item = ${JSON.stringify(item)}`);
+                    // console.log(`item = ${JSON.stringify(item)}`)
                     return cve?.cveId?.toString() == item?.cveId?.toString();
                 });
                 if (!found) {

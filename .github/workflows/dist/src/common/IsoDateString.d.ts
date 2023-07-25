@@ -34,6 +34,10 @@ export declare class IsoDateString {
     length(): number;
     /** returns the string representation */
     toString(): string;
+    /**
+     * @returns a number representing the number of millisecs since 1970-01-01T00:00:00.000Z
+     */
+    toNumber(): number;
     /** properly outputs the object in JSON.stringify() */
     toJSON(): string;
     /** returns a JS Date object from the string representation */

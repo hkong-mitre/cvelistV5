@@ -3,9 +3,11 @@ import { CveTweetData } from './CveTweetData.js';
 export declare class TwitterLog {
     static kFilename: string;
     filepath: string;
-    last_successful_tweet_timestamp: IsoDateString;
     newCves: CveTweetData[];
     tweetedCves: CveTweetData[];
+    private _last_successful_tweet_timestamp;
+    get last_successful_tweet_timestamp(): IsoDateString;
+    private set last_successful_tweet_timestamp(value);
     private constructor();
     /** reads in the recent activities into _activities */
     static fromLogfile(relFilepath?: string): TwitterLog;
