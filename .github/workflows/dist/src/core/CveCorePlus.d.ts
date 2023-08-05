@@ -5,6 +5,7 @@
  */
 import { CveId } from './CveId.js';
 import { CveCore } from './CveCore.js';
+import { CveRecord } from './CveRecord.js';
 export { CveId } from './CveId.js';
 export { CveCore } from './CveCore.js';
 export declare class CveCorePlus extends CveCore {
@@ -23,6 +24,12 @@ export declare class CveCorePlus extends CveCore {
      * @returns a CveCorePlus object
      */
     static fromCveCore(cveCore: CveCore): CveCorePlus;
+    /**
+     * builds a full CveCorePlus from a CveCore
+     * @param cveCore a CveCore object
+     * @returns a CveCorePlus object
+     */
+    static fromCveRecord(cve: CveRecord): CveCorePlus;
     /**
      * update CveCorePlus with additional data from the repository
      * @returns true iff a JSON file was found and readable to fill in

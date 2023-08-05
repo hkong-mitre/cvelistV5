@@ -1,3 +1,4 @@
+import { CveId } from './CveId.js';
 import { CveRecordV5, CveMetadata, Containers } from '../generated/quicktools/CveRecordV5.js';
 export { CveId, CveIdError } from './CveId.js';
 export interface WriteFileOptions {
@@ -16,6 +17,15 @@ export declare class CveRecord implements CveRecordV5 {
      *  @todo verify it is a CVE Record JSON v5 format format that we know how to work with
      */
     constructor(obj: CveRecordV5);
+    /** factory method that converts a CveId to a path in the
+     *  default `/cves` subdirectory, and synchronously reads in that CVE JSON 5.0 formatted file
+     *  and builds a CveRecord
+     *  @param cveId a string or CveId object
+     *  @param cves_directory (optional) relative or full path to where to find CVEs, if null, use .env spec
+     *    (e.g., `./test/fixtures/cve/5`)
+     *  @returns a CveRecord
+     */
+    static fromCveId(cve_id: string | CveId, cves_directory?: any): CveRecord | undefined;
     /** factory method that synchronously reads in a CVE Record from a CVE JSON 5.0 formatted file
      *  @param relFilepath relative or full path to the file
      *  @returns a CveRecord

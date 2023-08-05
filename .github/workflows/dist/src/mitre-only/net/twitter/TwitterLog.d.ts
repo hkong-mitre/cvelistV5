@@ -24,11 +24,11 @@ export declare class TwitterLog {
      * @param data a CveTweetData object
      */
     addNew(data: CveTweetData): void;
+    addTweeted(data: CveTweetData): void;
     /**
      * returns the first newCve, BUT DOES NOT REMOVE IT in case the tweet failed
      */
     nextNew(): CveTweetData;
-    setTweeted(data: CveTweetData): void;
     /**
      * adds data to tweetedCves list, and removes it from the newCves list
      * @param data the CveTweetData that was successfully tweeted

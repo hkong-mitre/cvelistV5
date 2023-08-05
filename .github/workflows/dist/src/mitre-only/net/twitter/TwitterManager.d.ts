@@ -7,11 +7,13 @@
  *    - to prevent retweeting the same CVE
  *    - have a large enough buffer in case github actions fail
  */
+import { InlineErrorV2 } from 'twitter-api-v2';
 import { IsoDateString } from '../../../common/IsoDateString.js';
 import { CveTweetData } from './CveTweetData.js';
 export interface TwitterResp {
     id: string;
     text: string;
+    errors: InlineErrorV2[];
 }
 export declare class TwitterManager {
     static credentials: {
@@ -23,7 +25,13 @@ export declare class TwitterManager {
     static __cveUrl: string;
     /** constructor */
     private constructor();
-    static tweetNewCves(): Promise<number>;
+    static tweetNewCves(useLogOnly?: boolean): Promise<number>;
+    /**
+     * using an array of CVE IDs, tweet the respective CVEs
+     * @param ids array of strings representing CVE IDs
+     * @returns number CVEs tweeted
+     */
+    static tweetCveUsingCveId(id: string): Promise<void>;
     static setTweeterLogDate(date: IsoDateString): Promise<IsoDateString>;
     /**
      *
@@ -33,5 +41,27 @@ export declare class TwitterManager {
      * @returns
      */
     static tweet(content: string): Promise<TwitterResp>;
+    /**
+     *
+     * @param content string to include in tweeet.
+     *                Note that this will automatically be trimmed to fit Twitter's text size
+     *                along with additional data required by the CVE tweet message
+     * @returns
+     */
+    static showLimits(): Promise<void>;
+    /**
+     *
+     * @param dateString ISO date string, but only the date portion will be used
+     * @returns collection of CveTweetData
+     */
+    static getRecentTweetsOnDate(dateString: string): Promise<CveTweetData[]>;
+    /**
+     *
+     * @param content string to include in tweeet.
+     *                Note that this will automatically be trimmed to fit Twitter's text size
+     *                along with additional data required by the CVE tweet message
+     * @returns
+     */
+    static getMyTwitterInfo(): Promise<void>;
     static findUntweeted(start: IsoDateString, stop: IsoDateString, dir: string): Promise<CveTweetData[]>;
 }

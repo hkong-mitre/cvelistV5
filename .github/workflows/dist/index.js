@@ -5569,6 +5569,225 @@ exports.emitterEventNames = emitterEventNames;
 
 /***/ }),
 
+/***/ 11027:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports["default"] = void 0;
+__exportStar(__nccwpck_require__(62417), exports);
+__exportStar(__nccwpck_require__(81582), exports);
+__exportStar(__nccwpck_require__(90183), exports);
+var plugin_1 = __nccwpck_require__(62417);
+Object.defineProperty(exports, "default", ({ enumerable: true, get: function () { return __importDefault(plugin_1).default; } }));
+
+
+/***/ }),
+
+/***/ 90183:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TwitterApiRateLimitMemoryStore = void 0;
+class TwitterApiRateLimitMemoryStore {
+    constructor() {
+        this.cache = {};
+    }
+    get(args) {
+        var _a, _b;
+        if (args.method) {
+            return (_b = (_a = this.cache[args.method]) === null || _a === void 0 ? void 0 : _a[args.endpoint]) === null || _b === void 0 ? void 0 : _b.rateLimit;
+        }
+        else {
+            for (const methodUrls of Object.values(this.cache)) {
+                if (args.endpoint in methodUrls) {
+                    return methodUrls[args.endpoint].rateLimit;
+                }
+            }
+            // otherwise: not found
+        }
+    }
+    set(args) {
+        const method = args.method;
+        const endpoint = args.endpoint;
+        if (!this.cache[method]) {
+            this.cache[method] = {};
+        }
+        // Delete possible existing item
+        this.delete(method, endpoint);
+        const timeUntilResetAndNow = (args.rateLimit.reset * 1000) - Date.now();
+        const normalizedTime = timeUntilResetAndNow < 0 ? 0 : timeUntilResetAndNow;
+        // Item is deleted automatically when {args.rateLimit.reset} happens
+        this.cache[method][endpoint] = {
+            rateLimit: args.rateLimit,
+            timeout: setTimeout(() => {
+                this.delete(method, endpoint);
+            }, normalizedTime),
+        };
+        // Don't make timeout block event loop
+        this.cache[method][endpoint].timeout.unref();
+    }
+    delete(method, endpoint) {
+        var _a;
+        const item = (_a = this.cache[method]) === null || _a === void 0 ? void 0 : _a[endpoint];
+        if (item) {
+            clearTimeout(item.timeout);
+            delete this.cache[method][endpoint];
+        }
+    }
+}
+exports.TwitterApiRateLimitMemoryStore = TwitterApiRateLimitMemoryStore;
+
+
+/***/ }),
+
+/***/ 62417:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TwitterApiRateLimitPluginWithPrefixV2 = exports.TwitterApiRateLimitPluginWithPrefixV1 = exports.TwitterApiRateLimitPluginWithPrefix = exports.TwitterApiRateLimitPlugin = void 0;
+const memory_store_1 = __nccwpck_require__(90183);
+const prefixes = {
+    v2: 'https://api.twitter.com/2/',
+    v2Labs: 'https://api.twitter.com/labs/2/',
+    v1: 'https://api.twitter.com/1.1/',
+    v1Upload: 'https://upload.twitter.com/1.1/',
+    v1Stream: 'https://stream.twitter.com/1.1/',
+};
+// - Base plugin -
+class TwitterApiRateLimitPlugin {
+    constructor(store) {
+        this.store = store || new memory_store_1.TwitterApiRateLimitMemoryStore();
+    }
+    async onAfterRequest(args) {
+        const rateLimit = args.response.rateLimit;
+        if (rateLimit) {
+            await this.store.set({
+                plugin: this,
+                endpoint: args.computedParams.rawUrl,
+                method: args.params.method.toUpperCase(),
+                rateLimit,
+            });
+        }
+    }
+    async onResponseError(args) {
+        const rateLimit = args.error.rateLimit;
+        if (rateLimit) {
+            await this.store.set({
+                plugin: this,
+                endpoint: args.computedParams.rawUrl,
+                method: args.params.method.toUpperCase(),
+                rateLimit,
+            });
+        }
+    }
+    /**
+     * Get the last obtained Twitter rate limit information for {endpoint}.
+     */
+    getRateLimit(endpoint, method) {
+        return this.store.get({
+            plugin: this,
+            endpoint,
+            method,
+        });
+    }
+    /**
+     *
+     * Tells if you hit the Twitter rate limit for {rateLimit}.
+     * Obtain {rateLimit} through {.getRateLimit}.
+     */
+    hasHitRateLimit(rateLimit) {
+        if (this.isRateLimitStatusObsolete(rateLimit)) {
+            return false;
+        }
+        return rateLimit.remaining === 0;
+    }
+    /**
+     * Tells if you hit the returned Twitter rate limit for the following {rateLimit} has expired.
+     * Obtain {rateLimit} through {.getRateLimit}.
+     */
+    isRateLimitStatusObsolete(rateLimit) {
+        if (!rateLimit) {
+            return true;
+        }
+        // Timestamps are exprimed in seconds, JS works with ms
+        return (rateLimit.reset * 1000) < Date.now();
+    }
+    get v1() {
+        if (this._v1Plugin) {
+            return this._v1Plugin;
+        }
+        return this._v1Plugin = new TwitterApiRateLimitPluginWithPrefixV1(this, 'v1');
+    }
+    get v2() {
+        if (this._v2Plugin) {
+            return this._v2Plugin;
+        }
+        return this._v2Plugin = new TwitterApiRateLimitPluginWithPrefixV2(this, 'v2');
+    }
+}
+exports.TwitterApiRateLimitPlugin = TwitterApiRateLimitPlugin;
+// - Extensions / Getters -
+class TwitterApiRateLimitPluginWithPrefix {
+    constructor(plugin, prefix) {
+        this.plugin = plugin;
+        this.prefix = prefix;
+    }
+    getRateLimit(endpoint, method) {
+        return this.plugin.getRateLimit(prefixes[this.prefix] + endpoint, method);
+    }
+    hasHitRateLimit(rateLimit) {
+        return this.plugin.hasHitRateLimit(rateLimit);
+    }
+    isRateLimitStatusObsolete(rateLimit) {
+        return this.plugin.isRateLimitStatusObsolete(rateLimit);
+    }
+}
+exports.TwitterApiRateLimitPluginWithPrefix = TwitterApiRateLimitPluginWithPrefix;
+class TwitterApiRateLimitPluginWithPrefixV1 extends TwitterApiRateLimitPluginWithPrefix {
+    get upload() {
+        return new TwitterApiRateLimitPluginWithPrefix(this.plugin, 'v1Upload');
+    }
+    get stream() {
+        return new TwitterApiRateLimitPluginWithPrefix(this.plugin, 'v1Stream');
+    }
+}
+exports.TwitterApiRateLimitPluginWithPrefixV1 = TwitterApiRateLimitPluginWithPrefixV1;
+class TwitterApiRateLimitPluginWithPrefixV2 extends TwitterApiRateLimitPluginWithPrefix {
+    get labs() {
+        return new TwitterApiRateLimitPluginWithPrefix(this.plugin, 'v2Labs');
+    }
+}
+exports.TwitterApiRateLimitPluginWithPrefixV2 = TwitterApiRateLimitPluginWithPrefixV2;
+exports["default"] = TwitterApiRateLimitPlugin;
+
+
+/***/ }),
+
+/***/ 81582:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+
 /***/ 66761:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -59306,6 +59525,7 @@ class Comparator {
       }
     }
 
+    comp = comp.trim().split(/\s+/).join(' ')
     debug('comparator', comp, options)
     this.options = options
     this.loose = !!options.loose
@@ -59368,13 +59588,6 @@ class Comparator {
       throw new TypeError('a Comparator is required')
     }
 
-    if (!options || typeof options !== 'object') {
-      options = {
-        loose: !!options,
-        includePrerelease: false,
-      }
-    }
-
     if (this.operator === '') {
       if (this.value === '') {
         return true
@@ -59387,39 +59600,50 @@ class Comparator {
       return new Range(this.value, options).test(comp.semver)
     }
 
-    const sameDirectionIncreasing =
-      (this.operator === '>=' || this.operator === '>') &&
-      (comp.operator === '>=' || comp.operator === '>')
-    const sameDirectionDecreasing =
-      (this.operator === '<=' || this.operator === '<') &&
-      (comp.operator === '<=' || comp.operator === '<')
-    const sameSemVer = this.semver.version === comp.semver.version
-    const differentDirectionsInclusive =
-      (this.operator === '>=' || this.operator === '<=') &&
-      (comp.operator === '>=' || comp.operator === '<=')
-    const oppositeDirectionsLessThan =
-      cmp(this.semver, '<', comp.semver, options) &&
-      (this.operator === '>=' || this.operator === '>') &&
-        (comp.operator === '<=' || comp.operator === '<')
-    const oppositeDirectionsGreaterThan =
-      cmp(this.semver, '>', comp.semver, options) &&
-      (this.operator === '<=' || this.operator === '<') &&
-        (comp.operator === '>=' || comp.operator === '>')
+    options = parseOptions(options)
 
-    return (
-      sameDirectionIncreasing ||
-      sameDirectionDecreasing ||
-      (sameSemVer && differentDirectionsInclusive) ||
-      oppositeDirectionsLessThan ||
-      oppositeDirectionsGreaterThan
-    )
+    // Special cases where nothing can possibly be lower
+    if (options.includePrerelease &&
+      (this.value === '<0.0.0-0' || comp.value === '<0.0.0-0')) {
+      return false
+    }
+    if (!options.includePrerelease &&
+      (this.value.startsWith('<0.0.0') || comp.value.startsWith('<0.0.0'))) {
+      return false
+    }
+
+    // Same direction increasing (> or >=)
+    if (this.operator.startsWith('>') && comp.operator.startsWith('>')) {
+      return true
+    }
+    // Same direction decreasing (< or <=)
+    if (this.operator.startsWith('<') && comp.operator.startsWith('<')) {
+      return true
+    }
+    // same SemVer and both sides are inclusive (<= or >=)
+    if (
+      (this.semver.version === comp.semver.version) &&
+      this.operator.includes('=') && comp.operator.includes('=')) {
+      return true
+    }
+    // opposite directions less than
+    if (cmp(this.semver, '<', comp.semver, options) &&
+      this.operator.startsWith('>') && comp.operator.startsWith('<')) {
+      return true
+    }
+    // opposite directions greater than
+    if (cmp(this.semver, '>', comp.semver, options) &&
+      this.operator.startsWith('<') && comp.operator.startsWith('>')) {
+      return true
+    }
+    return false
   }
 }
 
 module.exports = Comparator
 
 const parseOptions = __nccwpck_require__(40785)
-const { re, t } = __nccwpck_require__(9523)
+const { safeRe: re, t } = __nccwpck_require__(9523)
 const cmp = __nccwpck_require__(75098)
 const debug = __nccwpck_require__(50427)
 const SemVer = __nccwpck_require__(48088)
@@ -59459,9 +59683,16 @@ class Range {
     this.loose = !!options.loose
     this.includePrerelease = !!options.includePrerelease
 
-    // First, split based on boolean or ||
+    // First reduce all whitespace as much as possible so we do not have to rely
+    // on potentially slow regexes like \s*. This is then stored and used for
+    // future error messages as well.
     this.raw = range
-    this.set = range
+      .trim()
+      .split(/\s+/)
+      .join(' ')
+
+    // First, split on ||
+    this.set = this.raw
       .split('||')
       // map the range to a 2d array of comparators
       .map(r => this.parseRange(r.trim()))
@@ -59471,7 +59702,7 @@ class Range {
       .filter(c => c.length)
 
     if (!this.set.length) {
-      throw new TypeError(`Invalid SemVer Range: ${range}`)
+      throw new TypeError(`Invalid SemVer Range: ${this.raw}`)
     }
 
     // if we have any that are not the null set, throw out null sets.
@@ -59497,9 +59728,7 @@ class Range {
 
   format () {
     this.range = this.set
-      .map((comps) => {
-        return comps.join(' ').trim()
-      })
+      .map((comps) => comps.join(' ').trim())
       .join('||')
       .trim()
     return this.range
@@ -59510,12 +59739,12 @@ class Range {
   }
 
   parseRange (range) {
-    range = range.trim()
-
     // memoize range parsing for performance.
     // this is a very hot path, and fully deterministic.
-    const memoOpts = Object.keys(this.options).join(',')
-    const memoKey = `parseRange:${memoOpts}:${range}`
+    const memoOpts =
+      (this.options.includePrerelease && FLAG_INCLUDE_PRERELEASE) |
+      (this.options.loose && FLAG_LOOSE)
+    const memoKey = memoOpts + ':' + range
     const cached = cache.get(memoKey)
     if (cached) {
       return cached
@@ -59526,18 +59755,18 @@ class Range {
     const hr = loose ? re[t.HYPHENRANGELOOSE] : re[t.HYPHENRANGE]
     range = range.replace(hr, hyphenReplace(this.options.includePrerelease))
     debug('hyphen replace', range)
+
     // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
     range = range.replace(re[t.COMPARATORTRIM], comparatorTrimReplace)
     debug('comparator trim', range)
 
     // `~ 1.2.3` => `~1.2.3`
     range = range.replace(re[t.TILDETRIM], tildeTrimReplace)
+    debug('tilde trim', range)
 
     // `^ 1.2.3` => `^1.2.3`
     range = range.replace(re[t.CARETTRIM], caretTrimReplace)
-
-    // normalize spaces
-    range = range.split(/\s+/).join(' ')
+    debug('caret trim', range)
 
     // At this point, the range is completely trimmed and
     // ready to be split into comparators.
@@ -59623,6 +59852,7 @@ class Range {
     return false
   }
 }
+
 module.exports = Range
 
 const LRU = __nccwpck_require__(7129)
@@ -59633,12 +59863,13 @@ const Comparator = __nccwpck_require__(91532)
 const debug = __nccwpck_require__(50427)
 const SemVer = __nccwpck_require__(48088)
 const {
-  re,
+  safeRe: re,
   t,
   comparatorTrimReplace,
   tildeTrimReplace,
   caretTrimReplace,
 } = __nccwpck_require__(9523)
+const { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = __nccwpck_require__(42293)
 
 const isNullSet = c => c.value === '<0.0.0-0'
 const isAny = c => c.value === ''
@@ -59686,10 +59917,13 @@ const isX = id => !id || id.toLowerCase() === 'x' || id === '*'
 // ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0-0
 // ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0-0
 // ~0.0.1 --> >=0.0.1 <0.1.0-0
-const replaceTildes = (comp, options) =>
-  comp.trim().split(/\s+/).map((c) => {
-    return replaceTilde(c, options)
-  }).join(' ')
+const replaceTildes = (comp, options) => {
+  return comp
+    .trim()
+    .split(/\s+/)
+    .map((c) => replaceTilde(c, options))
+    .join(' ')
+}
 
 const replaceTilde = (comp, options) => {
   const r = options.loose ? re[t.TILDELOOSE] : re[t.TILDE]
@@ -59727,10 +59961,13 @@ const replaceTilde = (comp, options) => {
 // ^1.2.0 --> >=1.2.0 <2.0.0-0
 // ^0.0.1 --> >=0.0.1 <0.0.2-0
 // ^0.1.0 --> >=0.1.0 <0.2.0-0
-const replaceCarets = (comp, options) =>
-  comp.trim().split(/\s+/).map((c) => {
-    return replaceCaret(c, options)
-  }).join(' ')
+const replaceCarets = (comp, options) => {
+  return comp
+    .trim()
+    .split(/\s+/)
+    .map((c) => replaceCaret(c, options))
+    .join(' ')
+}
 
 const replaceCaret = (comp, options) => {
   debug('caret', comp, options)
@@ -59787,9 +60024,10 @@ const replaceCaret = (comp, options) => {
 
 const replaceXRanges = (comp, options) => {
   debug('replaceXRanges', comp, options)
-  return comp.split(/\s+/).map((c) => {
-    return replaceXRange(c, options)
-  }).join(' ')
+  return comp
+    .split(/\s+/)
+    .map((c) => replaceXRange(c, options))
+    .join(' ')
 }
 
 const replaceXRange = (comp, options) => {
@@ -59872,12 +60110,15 @@ const replaceXRange = (comp, options) => {
 const replaceStars = (comp, options) => {
   debug('replaceStars', comp, options)
   // Looseness is ignored here.  star is always as loose as it gets!
-  return comp.trim().replace(re[t.STAR], '')
+  return comp
+    .trim()
+    .replace(re[t.STAR], '')
 }
 
 const replaceGTE0 = (comp, options) => {
   debug('replaceGTE0', comp, options)
-  return comp.trim()
+  return comp
+    .trim()
     .replace(re[options.includePrerelease ? t.GTE0PRE : t.GTE0], '')
 }
 
@@ -59915,7 +60156,7 @@ const hyphenReplace = incPr => ($0,
     to = `<=${to}`
   }
 
-  return (`${from} ${to}`).trim()
+  return `${from} ${to}`.trim()
 }
 
 const testSet = (set, version, options) => {
@@ -59962,7 +60203,7 @@ const testSet = (set, version, options) => {
 
 const debug = __nccwpck_require__(50427)
 const { MAX_LENGTH, MAX_SAFE_INTEGER } = __nccwpck_require__(42293)
-const { re, t } = __nccwpck_require__(9523)
+const { safeRe: re, t } = __nccwpck_require__(9523)
 
 const parseOptions = __nccwpck_require__(40785)
 const { compareIdentifiers } = __nccwpck_require__(92463)
@@ -59978,7 +60219,7 @@ class SemVer {
         version = version.version
       }
     } else if (typeof version !== 'string') {
-      throw new TypeError(`Invalid Version: ${version}`)
+      throw new TypeError(`Invalid version. Must be a string. Got type "${typeof version}".`)
     }
 
     if (version.length > MAX_LENGTH) {
@@ -60137,36 +60378,36 @@ class SemVer {
 
   // preminor will bump the version up to the next minor release, and immediately
   // down to pre-release. premajor and prepatch work the same way.
-  inc (release, identifier) {
+  inc (release, identifier, identifierBase) {
     switch (release) {
       case 'premajor':
         this.prerelease.length = 0
         this.patch = 0
         this.minor = 0
         this.major++
-        this.inc('pre', identifier)
+        this.inc('pre', identifier, identifierBase)
         break
       case 'preminor':
         this.prerelease.length = 0
         this.patch = 0
         this.minor++
-        this.inc('pre', identifier)
+        this.inc('pre', identifier, identifierBase)
         break
       case 'prepatch':
         // If this is already a prerelease, it will bump to the next version
         // drop any prereleases that might already exist, since they are not
         // relevant at this point.
         this.prerelease.length = 0
-        this.inc('patch', identifier)
-        this.inc('pre', identifier)
+        this.inc('patch', identifier, identifierBase)
+        this.inc('pre', identifier, identifierBase)
         break
       // If the input is a non-prerelease version, this acts the same as
       // prepatch.
       case 'prerelease':
         if (this.prerelease.length === 0) {
-          this.inc('patch', identifier)
+          this.inc('patch', identifier, identifierBase)
         }
-        this.inc('pre', identifier)
+        this.inc('pre', identifier, identifierBase)
         break
 
       case 'major':
@@ -60208,9 +60449,15 @@ class SemVer {
         break
       // This probably shouldn't be used publicly.
       // 1.0.0 'pre' would become 1.0.0-0 which is the wrong direction.
-      case 'pre':
+      case 'pre': {
+        const base = Number(identifierBase) ? 1 : 0
+
+        if (!identifier && identifierBase === false) {
+          throw new Error('invalid increment argument: identifier is empty')
+        }
+
         if (this.prerelease.length === 0) {
-          this.prerelease = [0]
+          this.prerelease = [base]
         } else {
           let i = this.prerelease.length
           while (--i >= 0) {
@@ -60221,27 +60468,36 @@ class SemVer {
           }
           if (i === -1) {
             // didn't increment anything
-            this.prerelease.push(0)
+            if (identifier === this.prerelease.join('.') && identifierBase === false) {
+              throw new Error('invalid increment argument: identifier already exists')
+            }
+            this.prerelease.push(base)
           }
         }
         if (identifier) {
           // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
           // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
+          let prerelease = [identifier, base]
+          if (identifierBase === false) {
+            prerelease = [identifier]
+          }
           if (compareIdentifiers(this.prerelease[0], identifier) === 0) {
             if (isNaN(this.prerelease[1])) {
-              this.prerelease = [identifier, 0]
+              this.prerelease = prerelease
             }
           } else {
-            this.prerelease = [identifier, 0]
+            this.prerelease = prerelease
           }
         }
         break
-
+      }
       default:
         throw new Error(`invalid increment argument: ${release}`)
     }
-    this.format()
-    this.raw = this.version
+    this.raw = this.format()
+    if (this.build.length) {
+      this.raw += `+${this.build.join('.')}`
+    }
     return this
   }
 }
@@ -60328,7 +60584,7 @@ module.exports = cmp
 
 const SemVer = __nccwpck_require__(48088)
 const parse = __nccwpck_require__(75925)
-const { re, t } = __nccwpck_require__(9523)
+const { safeRe: re, t } = __nccwpck_require__(9523)
 
 const coerce = (version, options) => {
   if (version instanceof SemVer) {
@@ -60422,27 +60678,69 @@ module.exports = compare
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const parse = __nccwpck_require__(75925)
-const eq = __nccwpck_require__(91898)
 
 const diff = (version1, version2) => {
-  if (eq(version1, version2)) {
+  const v1 = parse(version1, null, true)
+  const v2 = parse(version2, null, true)
+  const comparison = v1.compare(v2)
+
+  if (comparison === 0) {
     return null
-  } else {
-    const v1 = parse(version1)
-    const v2 = parse(version2)
-    const hasPre = v1.prerelease.length || v2.prerelease.length
-    const prefix = hasPre ? 'pre' : ''
-    const defaultResult = hasPre ? 'prerelease' : ''
-    for (const key in v1) {
-      if (key === 'major' || key === 'minor' || key === 'patch') {
-        if (v1[key] !== v2[key]) {
-          return prefix + key
-        }
-      }
-    }
-    return defaultResult // may be undefined
   }
+
+  const v1Higher = comparison > 0
+  const highVersion = v1Higher ? v1 : v2
+  const lowVersion = v1Higher ? v2 : v1
+  const highHasPre = !!highVersion.prerelease.length
+  const lowHasPre = !!lowVersion.prerelease.length
+
+  if (lowHasPre && !highHasPre) {
+    // Going from prerelease -> no prerelease requires some special casing
+
+    // If the low version has only a major, then it will always be a major
+    // Some examples:
+    // 1.0.0-1 -> 1.0.0
+    // 1.0.0-1 -> 1.1.1
+    // 1.0.0-1 -> 2.0.0
+    if (!lowVersion.patch && !lowVersion.minor) {
+      return 'major'
+    }
+
+    // Otherwise it can be determined by checking the high version
+
+    if (highVersion.patch) {
+      // anything higher than a patch bump would result in the wrong version
+      return 'patch'
+    }
+
+    if (highVersion.minor) {
+      // anything higher than a minor bump would result in the wrong version
+      return 'minor'
+    }
+
+    // bumping major/minor/patch all have same result
+    return 'major'
+  }
+
+  // add the `pre` prefix if we are going to a prerelease version
+  const prefix = highHasPre ? 'pre' : ''
+
+  if (v1.major !== v2.major) {
+    return prefix + 'major'
+  }
+
+  if (v1.minor !== v2.minor) {
+    return prefix + 'minor'
+  }
+
+  if (v1.patch !== v2.patch) {
+    return prefix + 'patch'
+  }
+
+  // high and low are preleases
+  return 'prerelease'
 }
+
 module.exports = diff
 
 
@@ -60483,8 +60781,9 @@ module.exports = gte
 
 const SemVer = __nccwpck_require__(48088)
 
-const inc = (version, release, options, identifier) => {
+const inc = (version, release, options, identifier, identifierBase) => {
   if (typeof (options) === 'string') {
+    identifierBase = identifier
     identifier = options
     options = undefined
   }
@@ -60493,7 +60792,7 @@ const inc = (version, release, options, identifier) => {
     return new SemVer(
       version instanceof SemVer ? version.version : version,
       options
-    ).inc(release, identifier).version
+    ).inc(release, identifier, identifierBase).version
   } catch (er) {
     return null
   }
@@ -60556,35 +60855,18 @@ module.exports = neq
 /***/ 75925:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { MAX_LENGTH } = __nccwpck_require__(42293)
-const { re, t } = __nccwpck_require__(9523)
 const SemVer = __nccwpck_require__(48088)
-
-const parseOptions = __nccwpck_require__(40785)
-const parse = (version, options) => {
-  options = parseOptions(options)
-
+const parse = (version, options, throwErrors = false) => {
   if (version instanceof SemVer) {
     return version
   }
-
-  if (typeof version !== 'string') {
-    return null
-  }
-
-  if (version.length > MAX_LENGTH) {
-    return null
-  }
-
-  const r = options.loose ? re[t.LOOSE] : re[t.FULL]
-  if (!r.test(version)) {
-    return null
-  }
-
   try {
     return new SemVer(version, options)
   } catch (er) {
-    return null
+    if (!throwErrors) {
+      return null
+    }
+    throw er
   }
 }
 
@@ -60764,6 +61046,7 @@ module.exports = {
   src: internalRe.src,
   tokens: internalRe.t,
   SEMVER_SPEC_VERSION: constants.SEMVER_SPEC_VERSION,
+  RELEASE_TYPES: constants.RELEASE_TYPES,
   compareIdentifiers: identifiers.compareIdentifiers,
   rcompareIdentifiers: identifiers.rcompareIdentifiers,
 }
@@ -60785,11 +61068,29 @@ const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ||
 // Max safe segment length for coercion.
 const MAX_SAFE_COMPONENT_LENGTH = 16
 
+// Max safe length for a build identifier. The max length minus 6 characters for
+// the shortest version with a build 0.0.0+BUILD.
+const MAX_SAFE_BUILD_LENGTH = MAX_LENGTH - 6
+
+const RELEASE_TYPES = [
+  'major',
+  'premajor',
+  'minor',
+  'preminor',
+  'patch',
+  'prepatch',
+  'prerelease',
+]
+
 module.exports = {
-  SEMVER_SPEC_VERSION,
   MAX_LENGTH,
-  MAX_SAFE_INTEGER,
   MAX_SAFE_COMPONENT_LENGTH,
+  MAX_SAFE_BUILD_LENGTH,
+  MAX_SAFE_INTEGER,
+  RELEASE_TYPES,
+  SEMVER_SPEC_VERSION,
+  FLAG_INCLUDE_PRERELEASE: 0b001,
+  FLAG_LOOSE: 0b010,
 }
 
 
@@ -60844,16 +61145,20 @@ module.exports = {
 /***/ 40785:
 /***/ ((module) => {
 
-// parse out just the options we care about so we always get a consistent
-// obj with keys in a consistent order.
-const opts = ['includePrerelease', 'loose', 'rtl']
-const parseOptions = options =>
-  !options ? {}
-  : typeof options !== 'object' ? { loose: true }
-  : opts.filter(k => options[k]).reduce((o, k) => {
-    o[k] = true
-    return o
-  }, {})
+// parse out just the options we care about
+const looseOption = Object.freeze({ loose: true })
+const emptyOpts = Object.freeze({ })
+const parseOptions = options => {
+  if (!options) {
+    return emptyOpts
+  }
+
+  if (typeof options !== 'object') {
+    return looseOption
+  }
+
+  return options
+}
 module.exports = parseOptions
 
 
@@ -60862,22 +61167,52 @@ module.exports = parseOptions
 /***/ 9523:
 /***/ ((module, exports, __nccwpck_require__) => {
 
-const { MAX_SAFE_COMPONENT_LENGTH } = __nccwpck_require__(42293)
+const {
+  MAX_SAFE_COMPONENT_LENGTH,
+  MAX_SAFE_BUILD_LENGTH,
+  MAX_LENGTH,
+} = __nccwpck_require__(42293)
 const debug = __nccwpck_require__(50427)
 exports = module.exports = {}
 
 // The actual regexps go on exports.re
 const re = exports.re = []
+const safeRe = exports.safeRe = []
 const src = exports.src = []
 const t = exports.t = {}
 let R = 0
 
+const LETTERDASHNUMBER = '[a-zA-Z0-9-]'
+
+// Replace some greedy regex tokens to prevent regex dos issues. These regex are
+// used internally via the safeRe object since all inputs in this library get
+// normalized first to trim and collapse all extra whitespace. The original
+// regexes are exported for userland consumption and lower level usage. A
+// future breaking change could export the safer regex only with a note that
+// all input should have extra whitespace removed.
+const safeRegexReplacements = [
+  ['\\s', 1],
+  ['\\d', MAX_LENGTH],
+  [LETTERDASHNUMBER, MAX_SAFE_BUILD_LENGTH],
+]
+
+const makeSafeRegex = (value) => {
+  for (const [token, max] of safeRegexReplacements) {
+    value = value
+      .split(`${token}*`).join(`${token}{0,${max}}`)
+      .split(`${token}+`).join(`${token}{1,${max}}`)
+  }
+  return value
+}
+
 const createToken = (name, value, isGlobal) => {
+  const safe = makeSafeRegex(value)
   const index = R++
   debug(name, index, value)
   t[name] = index
   src[index] = value
   re[index] = new RegExp(value, isGlobal ? 'g' : undefined)
+  safeRe[index] = new RegExp(safe, isGlobal ? 'g' : undefined)
 }
 
 // The following Regular Expressions can be used for tokenizing,
@@ -60887,13 +61222,13 @@ const createToken = (name, value, isGlobal) => {
 // A single `0`, or a non-zero digit followed by zero or more digits.
 
 createToken('NUMERICIDENTIFIER', '0|[1-9]\\d*')
-createToken('NUMERICIDENTIFIERLOOSE', '[0-9]+')
+createToken('NUMERICIDENTIFIERLOOSE', '\\d+')
 
 // ## Non-numeric Identifier
 // Zero or more digits, followed by a letter or hyphen, and then zero or
 // more letters, digits, or hyphens.
 
-createToken('NONNUMERICIDENTIFIER', '\\d*[a-zA-Z-][a-zA-Z0-9-]*')
+createToken('NONNUMERICIDENTIFIER', `\\d*[a-zA-Z-]${LETTERDASHNUMBER}*`)
 
 // ## Main Version
 // Three dot-separated numeric identifiers.
@@ -60928,7 +61263,7 @@ createToken('PRERELEASELOOSE', `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]
 // ## Build Metadata Identifier
 // Any combination of digits, letters, or hyphens.
 
-createToken('BUILDIDENTIFIER', '[0-9A-Za-z-]+')
+createToken('BUILDIDENTIFIER', `${LETTERDASHNUMBER}+`)
 
 // ## Build Metadata
 // Plus sign, followed by one or more period-separated build metadata
@@ -61066,7 +61401,7 @@ const Range = __nccwpck_require__(9828)
 const intersects = (r1, r2, options) => {
   r1 = new Range(r1, options)
   r2 = new Range(r2, options)
-  return r1.intersects(r2)
+  return r1.intersects(r2, options)
 }
 module.exports = intersects
 
@@ -61429,6 +61764,9 @@ const subset = (sub, dom, options = {}) => {
   return true
 }
 
+const minimumVersionWithPreRelease = [new Comparator('>=0.0.0-0')]
+const minimumVersion = [new Comparator('>=0.0.0')]
+
 const simpleSubset = (sub, dom, options) => {
   if (sub === dom) {
     return true
@@ -61438,9 +61776,9 @@ const simpleSubset = (sub, dom, options) => {
     if (dom.length === 1 && dom[0].semver === ANY) {
       return true
     } else if (options.includePrerelease) {
-      sub = [new Comparator('>=0.0.0-0')]
+      sub = minimumVersionWithPreRelease
     } else {
-      sub = [new Comparator('>=0.0.0')]
+      sub = minimumVersion
     }
   }
 
@@ -61448,7 +61786,7 @@ const simpleSubset = (sub, dom, options) => {
     if (options.includePrerelease) {
       return true
     } else {
-      dom = [new Comparator('>=0.0.0')]
+      dom = minimumVersion
     }
   }
 
@@ -71701,7 +72039,7 @@ dotenv__WEBPACK_IMPORTED_MODULE_0__.config();
  *  The format follows semver for released software: Major.Minor.Patch, e.g., `1.0.0`
  *  However before release, it only uses the GitHub Project sprint number, e.g., `Sprint-1`
  */
-const version = `0.9+twitter-2023-07-24`;
+const version = `0.9+twitter-2023-08-05`;
 // import { MainCommands } from './commands/MainCommands.js';
 // const program = new MainCommands(version);
 // ----- MITRE-only ----- ----- ----
@@ -73280,8 +73618,8 @@ class CveDate {
      *  [1] - the time (e.g., "19:05:55.559Z")
      *  [2] - the hour (e.g., "19")
      */
-    static getDateComponents(jsDate = null) {
-        const isoStr = jsDate.toISOString();
+    static getDateComponents(jsDate) {
+        const isoStr = (jsDate) ? jsDate.toISOString() : new Date().toISOString();
         return [
             isoStr.substring(0, isoStr.indexOf('T')),
             isoStr.substring(isoStr.indexOf('T') + 1),
@@ -77840,6 +78178,27 @@ class CveRecord {
         this.dataType = obj['dataType'];
         this.dataVersion = obj['dataVersion'];
     }
+    /** factory method that converts a CveId to a path in the
+     *  default `/cves` subdirectory, and synchronously reads in that CVE JSON 5.0 formatted file
+     *  and builds a CveRecord
+     *  @param cveId a string or CveId object
+     *  @param cves_directory (optional) relative or full path to where to find CVEs, if null, use .env spec
+     *    (e.g., `./test/fixtures/cve/5`)
+     *  @returns a CveRecord
+     */
+    static fromCveId(cve_id, cves_directory = null) {
+        console.log(`cve_id=${cve_id}`);
+        const cveId = new CveId(cve_id);
+        let path;
+        if (!cves_directory) {
+            path = `${cveId.getFullCvePath()}.json`;
+        }
+        else {
+            path = `${cves_directory}/${cveId.getCvePath()}.json`;
+        }
+        console.log(`path=${path}`);
+        return CveRecord.fromJsonFile(path);
+    }
     /** factory method that synchronously reads in a CVE Record from a CVE JSON 5.0 formatted file
      *  @param relFilepath relative or full path to the file
      *  @returns a CveRecord
@@ -77948,6 +78307,22 @@ class CveCorePlus extends CveCore {
         obj.dateReserved = cveCore?.dateReserved;
         obj.datePublished = cveCore?.datePublished;
         obj.dateUpdated = cveCore?.dateUpdated;
+        return obj;
+    }
+    /**
+     * builds a full CveCorePlus from a CveCore
+     * @param cveCore a CveCore object
+     * @returns a CveCorePlus object
+     */
+    static fromCveRecord(cve) {
+        const obj = new CveCorePlus(cve?.cveId);
+        obj.state = cve?.cveMetadata?.state;
+        obj.assignerOrgId = cve?.cveMetadata?.assignerOrgId;
+        obj.assignerShortName = cve?.cveMetadata?.assignerShortName;
+        obj.dateReserved = cve?.cveMetadata?.dateReserved;
+        obj.datePublished = cve?.cveMetadata?.datePublished;
+        obj.dateUpdated = cve?.cveMetadata?.dateUpdated;
+        obj.description = cve?.getDescription();
         return obj;
     }
     // ----- accessors and mutators ----- ----- ----- -----
@@ -78346,7 +78721,7 @@ class Delta /*implements DeltaProps*/ {
      */
     writeCves(relDir = undefined, zipFile = undefined) {
         const pwd = external_process_default().cwd();
-        relDir = relDir ? relDir : __nccwpck_require__.ab + "deltas";
+        relDir = relDir ? relDir : `${pwd}/deltas`;
         external_fs_default().mkdirSync(relDir, { recursive: true });
         console.log(`copying changed CVEs to ${relDir}`);
         this.new.forEach((item) => {
@@ -83819,10 +84194,17 @@ class RebuildCommand extends GenericCommand {
 
 // EXTERNAL MODULE: ./node_modules/twitter-api-v2/dist/cjs/index.js
 var cjs = __nccwpck_require__(15395);
+// EXTERNAL MODULE: ./node_modules/@twitter-api-v2/plugin-rate-limit/dist/index.js
+var plugin_rate_limit_dist = __nccwpck_require__(11027);
 ;// CONCATENATED MODULE: ./src/mitre-only/net/twitter/CveTweetData.ts
 
 
+
+
+
 class CveTweetData {
+    /** cveId is the only required field.  When reading tweets from twitter using the Twitter API, it needs
+     *  to be rebuilt by fromTwitterApi() because it is encapsulated in Twitter's "text" field */
     cveId;
     datePublished;
     tweeted;
@@ -83833,6 +84215,9 @@ class CveTweetData {
     set description(str) {
         this._description = str;
     }
+    /** tweetText is optional.  It is built when tweeting a new CVE (using buildTweetText()), and it is
+     *  returned verbatim from Twitter API's "text" field when reading tweeted CVEs
+     */
     _tweetText;
     /** returns the tweet text */
     get tweetText() {
@@ -83863,6 +84248,19 @@ class CveTweetData {
     set tweetText(str) {
         this._tweetText = str;
     }
+    twitter_id;
+    cveIdOnly() {
+        if (!this.description && !this.datePublished) {
+            return true;
+        }
+        return false;
+    }
+    static hasCveIdOnly(obj) {
+        if (!obj.description && !obj.datePublished) {
+            return true;
+        }
+        return false;
+    }
     buildTweetText() {
         this._tweetText = CveTweetData.buildCveTweetText(this.cveId, this._description, this.datePublished);
         return this._tweetText;
@@ -83872,23 +84270,34 @@ class CveTweetData {
     // ----- constructor and factories ----- ----- ----- -----
     /**
      * constructs a CveTweetData
-     * @param cveId required CveId
-     * @param description required full description text
+     * @param cveId required CveId object or CVE ID string
+     * @param description optional full description text
      * @param datePublished optional date published
-     * @param tweetText calculated or copied text to be tweeted
-     * @param tweeted calcuated or copied timestamp when tweeted
+     * @param tweetText optional calculated or copied text to be tweeted
+     * @param tweeted optional calcuated or copied timestamp when tweeted
      */
     constructor(cveId, description = undefined, datePublished = undefined, tweetText = undefined, tweeted = undefined) {
-        this.cveId = cveId;
+        this.cveId = new CveId(cveId);
         this.description = description;
         this.datePublished = datePublished;
-        this.tweetText = tweetText ?? CveTweetData.buildCveTweetText(this.cveId, this.description, this.datePublished);
+        this.tweetText = tweetText;
         this.tweeted = tweeted;
     }
     /** builds a CveTweetData from a CveCorePlus object */
     static fromCveCorePlus(cvep) {
         const ctd = new CveTweetData(cvep.cveId, cvep.description, cvep.datePublished ? new IsoDateString(cvep.datePublished, true) : undefined);
+        ctd.buildTweetText();
         return ctd;
+    }
+    /** returns a full CveTweetData object given a CVE ID string
+     *  @param cveid a string representation of the CVE ID
+     */
+    static fromCveIdString(cveid) {
+        console.log(`fromCveIdString(${cveid})`);
+        const cve = CveRecord.fromCveId(cveid);
+        console.log(`cve=${JSON.stringify(cve, null, 2)}`);
+        const cvep = CveCorePlus.fromCveRecord(cve);
+        return CveTweetData.fromCveCorePlus(cvep);
     }
     /**
      * Builds a CveTweetData object out of the parameters provided, including
@@ -83923,11 +84332,12 @@ class CveTweetData {
     }
     toJSON() {
         return {
-            cveId: this.cveId.toJSON(),
+            cveId: this.cveId?.toJSON(),
             description: this.description,
-            datePublished: this.datePublished.toJSON(),
+            datePublished: this.datePublished?.toJSON(),
             tweetText: this.tweetText,
             tweeted: this.tweeted?.toJSON(),
+            twitter_id: this.twitter_id,
         };
     }
     /**
@@ -83994,7 +84404,7 @@ class TwitterLog {
                 twitterLog.addNew(item);
             });
             json['tweetedCves']?.forEach((item) => {
-                twitterLog.setTweeted(item);
+                twitterLog.addTweeted(item);
             });
         }
         return twitterLog;
@@ -84038,24 +84448,31 @@ class TwitterLog {
             this.newCves.push(data);
         }
     }
+    addTweeted(data) {
+        this.tweetedCves.push(data);
+    }
     /**
      * returns the first newCve, BUT DOES NOT REMOVE IT in case the tweet failed
      */
     nextNew() {
         return this.newCves[0];
     }
-    setTweeted(data) {
-        data.tweeted = new IsoDateString();
-        // this.newCves.shift();
-        this.tweetedCves.push(data);
-    }
+    // setTweeted(data: CveTweetData): void {
+    //   data.tweeted = new IsoDateString()
+    //   // this.newCves.shift();
+    //   this.tweetedCves.push(data);
+    // }
     /**
      * adds data to tweetedCves list, and removes it from the newCves list
      * @param data the CveTweetData that was successfully tweeted
      */
     pushAsTweeted(data) {
         this.newCves = this.newCves.filter((item) => item.cveId !== data.cveId);
-        this.setTweeted(data);
+        data.tweeted = new IsoDateString();
+        if (!data.tweetText) {
+            data.tweetText = CveTweetData.buildCveTweetText(data.cveId, data.description, data.datePublished);
+        }
+        this.addTweeted(data);
         this.setLogDate(new IsoDateString());
     }
     /**
@@ -84123,6 +84540,10 @@ class TwitterLog {
 
 
 
+
+
+
+
 main.config();
 class TwitterManager {
     static credentials = {
@@ -84134,17 +84555,25 @@ class TwitterManager {
     static __cveUrl = process.env.CVE_ORG_URL;
     /** constructor */
     constructor() { }
-    static async tweetNewCves() {
-        const twitterlog = await TwitterLog.fromGit(TwitterLog.kFilename);
+    static async tweetNewCves(useLogOnly = false) {
+        // console.log(`TwitterManager.tweetNewCves(${useLogOnly})`)
+        let twitterlog;
+        if (useLogOnly) {
+            console.log(`skipping git, using twitter log only`);
+            twitterlog = await TwitterLog.fromLogfile(TwitterLog.kFilename);
+        }
+        else {
+            twitterlog = await TwitterLog.fromGit(TwitterLog.kFilename);
+        }
         try {
-            const twitterClient = new cjs.TwitterApi(TwitterManager.credentials);
+            // const twitterClient = new TwitterApi(TwitterManager.credentials);
             let numTweeted = 0;
             let item = twitterlog.nextNew();
             let twitterApiFailed = false;
             while (!twitterApiFailed && item !== undefined) {
-                // console.log(`item=${JSON.stringify(item,null,2)}`)
-                if (!item.tweetText) {
-                    item.buildTweetText();
+                console.log(`item=${JSON.stringify(item, null, 2)}`);
+                if (CveTweetData.hasCveIdOnly(item)) {
+                    item = CveTweetData.fromCveIdString(item.cveId.toString());
                 }
                 // const tweetData = CveTweetData.buildCveTweetData(
                 //   item.cveId,
@@ -84152,7 +84581,7 @@ class TwitterManager {
                 //   item.datePublished,
                 // );
                 try {
-                    console.log(`tweeting ${item.tweetText}`);
+                    console.log(`about to tweet ${item.tweetText}`);
                     const resp = await this.tweet(item.tweetText);
                     numTweeted++;
                     // the following line sometimes does not work, in which case, the second line can be used
@@ -84170,6 +84599,52 @@ class TwitterManager {
             // twitterlog.cleanup()
             // twitterlog.writeLogfile(`${TwitterLog.kFilename}`);
             return numTweeted;
+        }
+        catch (e) {
+            console.log(`Error from Twitter:`, e);
+            throw e;
+        }
+    }
+    /**
+     * using an array of CVE IDs, tweet the respective CVEs
+     * @param ids array of strings representing CVE IDs
+     * @returns number CVEs tweeted
+     */
+    static async tweetCveUsingCveId(id) {
+        const twitterlog = TwitterLog.fromLogfile(TwitterLog.kFilename);
+        try {
+            // let numTweeted = 0;
+            // let twitterApiFailed: boolean = false;
+            // let index = 0
+            // while (!twitterApiFailed && index < ids.length) {
+            const cve = CveRecord.fromCveId(id);
+            // console.log(`cve=${JSON.stringify(cve,null,2)}`)
+            const cvep = CveCorePlus.fromCveRecord(cve);
+            const item = CveTweetData.fromCveCorePlus(cvep);
+            // console.log(`item=${JSON.stringify(item,null,2)}`)
+            if (!item.tweetText) {
+                item.buildTweetText();
+            }
+            // console.log(`tweetCveUsingCveId().item=${JSON.stringify(item,null,2)}`)
+            try {
+                console.log(`about to tweet ${item.tweetText}`);
+                const resp = await this.tweet(item.tweetText);
+                // numTweeted++;
+                // the following line sometimes does not work, in which case, the second line can be used
+                // item.setTweeted();
+                // item.tweeted = new IsoDateString();
+                twitterlog.pushAsTweeted(item);
+                twitterlog.writeLogfile();
+                // item = twitterlog.nextNew();
+            }
+            catch (e) {
+                console.log(`error:  `, e);
+                // twitterApiFailed = true;
+            }
+            // }
+            // twitterlog.cleanup()
+            // twitterlog.writeLogfile(`${TwitterLog.kFilename}`);
+            // return numTweeted;
         }
         catch (e) {
             console.log(`Error from Twitter:`, e);
@@ -84198,16 +84673,170 @@ class TwitterManager {
     static async tweet(content) {
         try {
             // console.log(`credentials=${JSON.stringify(this.credentials, null, 2)}`);
-            const twitterClient = new cjs.TwitterApi(TwitterManager.credentials);
+            const rateLimitPlugin = new plugin_rate_limit_dist.TwitterApiRateLimitPlugin();
+            const twitterClient = new cjs.TwitterApi(TwitterManager.credentials, { plugins: [rateLimitPlugin] });
             console.log(`tweeting ${content}`);
-            const { data: ct } = await twitterClient.v2.tweet(content);
+            // documentation for tweet:  https://developer.twitter.com/en/docs/twitter-api/tweets/manage-tweets/api-reference/post-tweets
+            const response = await twitterClient.v2.tweet(content);
+            if (response?.errors) {
+                console.log(`error in twitter response:  ${response.errors}`);
+            }
             return {
-                id: ct.id,
-                text: ct.text,
+                id: response.data.id,
+                text: response.data.text,
+                errors: response?.errors,
             };
         }
         catch (e) {
-            console.log(`Error from Twitter:`, e);
+            if (e instanceof cjs.ApiResponseError) {
+                // console.log(`ApiResponseError from Twitter:`, e);
+                console.log(`ApiResponseError from twitter:`, {
+                    error: true,
+                    code: e.code,
+                    headers: e.headers,
+                    rateLimit: e.rateLimit,
+                    data: e.data
+                });
+            }
+            else {
+                console.log(`Error from Twitter:`, e);
+            }
+            throw e;
+        }
+    }
+    /**
+     *
+     * @param content string to include in tweeet.
+     *                Note that this will automatically be trimmed to fit Twitter's text size
+     *                along with additional data required by the CVE tweet message
+     * @returns
+     */
+    static async showLimits() {
+        try {
+            // console.log(`credentials=${JSON.stringify(this.credentials, null, 2)}`);
+            const rateLimitPlugin = new plugin_rate_limit_dist.TwitterApiRateLimitPlugin();
+            const twitterClient = new cjs.TwitterApi(TwitterManager.credentials, { plugins: [rateLimitPlugin] });
+            // documentation for tweet:  https://developer.twitter.com/en/docs/twitter-api/tweets/manage-tweets/api-reference/post-tweets
+            const response = await twitterClient.v2.me();
+            if (response?.errors) {
+                console.log(`error in twitter response:  ${response.errors}`);
+            }
+            const limits = await rateLimitPlugin.v2.getRateLimit('users/me');
+            console.log(`limits=${JSON.stringify(limits, null, 2)}`);
+        }
+        catch (e) {
+            if (e instanceof cjs.ApiResponseError) {
+                // console.log(`ApiResponseError from Twitter:`, e);
+                console.log(`ApiResponseError from twitter:`, {
+                    error: true,
+                    code: e.code,
+                    headers: e.headers,
+                    rateLimit: e.rateLimit,
+                    data: e.data
+                });
+            }
+            else {
+                console.log(`Error from Twitter:`, e);
+            }
+            throw e;
+        }
+    }
+    /**
+     *
+     * @param dateString ISO date string, but only the date portion will be used
+     * @returns collection of CveTweetData
+     */
+    static async getRecentTweetsOnDate(dateString) {
+        try {
+            // console.log(`credentials=${JSON.stringify(this.credentials, null, 2)}`);
+            // const rateLimitPlugin = new TwitterApiRateLimitPlugin()
+            const twitterClient = new cjs.TwitterApi(TwitterManager.credentials);
+            // documentation for tweet:  https://developer.twitter.com/en/docs/twitter-api/tweets/manage-tweets/api-reference/post-tweets      
+            // const date: IsoDateString = new IsoDateString(dateString)
+            let options = {
+                start_time: `${dateString}T00:00:00.000Z`,
+                end_time: `${dateString}T23:59:59.999Z`,
+                expansions: "edit_history_tweet_ids",
+                "tweet.fields": ["created_at", "entities"],
+                max_results: 100, // 5 is min, 100 is max
+                // pagination_token: 'next_token from previous page'
+                // since_id: "id after which to return (does not return specified id)"
+                // until_id: "1685295590584782848"//id before which to return"  <<-- might be best to use for "recent tweets"
+            };
+            const response = await twitterClient.v2.userTimeline("821806287461740544", options);
+            if (response?.errors?.length > 0) {
+                console.log(`error in twitter response:  ${response.errors}`);
+            }
+            // console.log(`data=${JSON.stringify(response.data,null,2)}`)
+            console.log(`limit=${JSON.stringify(response.rateLimit, null, 2)}`);
+            const ret = [];
+            response.data.data.forEach(element => {
+                // delete element.entities
+                // delete element.edit_history_tweet_ids
+                // ret.push(element)
+                const tokens = element.text.split(' ');
+                const ctd = new CveTweetData(tokens[0], undefined, undefined, element.text, new IsoDateString(element.created_at));
+                ctd.twitter_id = element.id;
+                ret.push(ctd);
+            });
+            return ret;
+        }
+        catch (e) {
+            if (e instanceof cjs.ApiResponseError) {
+                // console.log(`ApiResponseError from Twitter:`, e);
+                console.log(`ApiResponseError from twitter:`, {
+                    error: true,
+                    code: e.code,
+                    headers: e.headers,
+                    rateLimit: e.rateLimit,
+                    data: e.data
+                });
+            }
+            else {
+                console.log(`Error from Twitter:`, e);
+            }
+            throw e;
+        }
+    }
+    /**
+     *
+     * @param content string to include in tweeet.
+     *                Note that this will automatically be trimmed to fit Twitter's text size
+     *                along with additional data required by the CVE tweet message
+     * @returns
+     */
+    static async getMyTwitterInfo() {
+        try {
+            // console.log(`credentials=${JSON.stringify(this.credentials, null, 2)}`);
+            // const rateLimitPlugin = new TwitterApiRateLimitPlugin()
+            const twitterClient = new cjs.TwitterApi(TwitterManager.credentials);
+            // // documentation for tweet:  https://developer.twitter.com/en/docs/twitter-api/tweets/manage-tweets/api-reference/post-tweets
+            // const response: UserV2Result = await twitterClient.v2.tweets()
+            // if ( response?.errors ) {
+            //   console.log(`error in twitter response:  ${response.errors}`)
+            // }
+            // const limits = await rateLimitPlugin.v2.getRateLimit('users/me')
+            // console.log(`limits=${JSON.stringify(limits,null,2)}`)
+            const usernameLookup = await twitterClient.v2.me(
+            //The Twitter username (handle) of the user.
+            // "TwitterDev"
+            );
+            console.log(`me=${JSON.stringify(usernameLookup.data, null, 2)}`);
+        }
+        catch (e) {
+            if (e instanceof cjs.ApiResponseError) {
+                // console.log(`ApiResponseError from Twitter:`, e);
+                console.log(`ApiResponseError from twitter:`, {
+                    error: true,
+                    code: e.code,
+                    headers: e.headers,
+                    rateLimit: e.rateLimit,
+                    data: e.data
+                });
+            }
+            else {
+                console.log(`Error from Twitter:`, e);
+            }
             throw e;
         }
     }
@@ -84241,6 +84870,10 @@ class TwitterManager {
 
 ;// CONCATENATED MODULE: ./src/mitre-only/commands/TwitterCommand.ts
 
+// import { CveDate } from '../../core/CveDate.js';
+// import { Delta } from '../../core/Delta.js';
+
+
 
 // import { TwitterLog } from '../net/twitter/TwitterLog.js';
 // import { IsoDateString } from '../../common/IsoDateString.js';
@@ -84257,22 +84890,36 @@ class TwitterCommand extends GenericCommand {
             //   'truncates the twitter_log file, removing everything before the specified ISO date, defaults to now',
             //   new IsoDateString().toString(),
             // )
+            // .argument('<ids...>', 'one or more files to upload')
+            // .option(
+            //   '--add-to-new <id1,id2,id3>',
+            //   `adds CVE IDs to the "new" list to be tweeted next time the twitter subcommand is run [does not work as expected]`,
+            // )
+            .option('--info', `shows twitter information about the account`)
             .option('--set-log-date <ISO date>', `sets the log date ('last_successful_tweet_timestamp')`)
+            .option('--show-tweeted <ISO date>', 'show CVEs (using twitter API) tweeted on <ISO date>; use --use-log-only to view the "tweeted" list instead of using the twitter API')
             .option('--show-untweeted', 'show CVEs that should have been tweeted but was not, requires --start')
             .option('--start <ISO date>', `start window`)
             .option('--stop <ISO date>', 'stop window, defaults to now', now.toISOString())
+            .option('--tweet-cveids <id1,id2,id3>', `tweets a comma delimited set of CVE IDs (no spaces)`)
+            .option('--use-log-only', `use twitter log only, do not use git, useful after --add-to-new`)
             .action(this.run);
     }
     async run(options) {
         super.prerun({ display: true, ...options });
-        // ----- --showUntweeted
-        if (options.showUntweeted) {
-            const untweetedCves = await TwitterManager.findUntweeted(options.start, options.stop, 'cves');
-            // @todo remove tweets before --start
-            console.log(`untweeted CVEs:  `);
-            untweetedCves.forEach((element, index) => {
-                console.log(` ${index + 1}: ${element.cveId}: `);
+        if (options.addToNew) {
+            const ids = options.addToNew.split(',');
+            const twitterLog = TwitterLog.fromLogfile(TwitterLog.kFilename);
+            ids.forEach(cveId => {
+                const tweetData = new CveTweetData(cveId);
+                twitterLog.addNew(tweetData);
             });
+            twitterLog.writeLogfile(TwitterLog.kFilename);
+        }
+        // ----- --show-limits
+        else if (options.info) {
+            const resp = await TwitterManager.showLimits();
+            const resp2 = await TwitterManager.getMyTwitterInfo();
         }
         else if (options.setLogDate) {
             const date = await TwitterManager.setTweeterLogDate(options.setLogDate);
@@ -84286,9 +84933,34 @@ class TwitterCommand extends GenericCommand {
         //   );
         //   log.cleanup(new IsoDateString(options.truncatedLogTo));
         // }
-        // ----- tweet
+        // ----- --show-tweeted
+        else if (options.showTweeted) {
+            const list = await TwitterManager.getRecentTweetsOnDate(options.showTweeted);
+            // @todo remove tweets before --start
+            console.log(`${list.length} CVEs tweeted on ${options.showTweeted}:  `);
+            console.log(JSON.stringify(list, null, 2));
+        }
+        // ----- tweet a list of CVE IDs
+        else if (options.tweetCveids) {
+            const ids = options.tweetCveids.split(',');
+            console.log(`tweet ${JSON.stringify(ids)}`);
+            ids.forEach(async (cveId) => {
+                const resp = await TwitterManager.tweetCveUsingCveId(cveId);
+                console.log(`after tweeting '${cveId}', got this response:  ${JSON.stringify(resp, null, 2)}`);
+            });
+        }
+        // ----- --show-untweeted
+        else if (options.showUntweeted) {
+            const untweetedCves = await TwitterManager.findUntweeted(options.start, options.stop, 'cves');
+            // @todo remove tweets before --start
+            console.log(`untweeted CVEs:  `);
+            untweetedCves.forEach((element, index) => {
+                console.log(` ${index + 1}: ${element.cveId}: `);
+            });
+        }
+        // ----- normal tweets of recently published CVEs
         else {
-            const numTweets = await TwitterManager.tweetNewCves();
+            const numTweets = await TwitterManager.tweetNewCves(options.useLogOnly);
             if (numTweets === 0) {
                 console.log(`there are no new CVEs to tweet at this time.`);
             }
