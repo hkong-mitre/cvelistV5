@@ -5,6 +5,7 @@
  */
 import { CveId } from './CveId.js';
 import { CveCore } from './CveCore.js';
+import { CveMetadata } from '../generated/quicktools/CveRecordV5.js';
 import { CveRecord } from './CveRecord.js';
 export { CveId } from './CveId.js';
 export { CveCore } from './CveCore.js';
@@ -18,6 +19,12 @@ export declare class CveCorePlus extends CveCore {
      * @param cveId a CveId or string
      */
     constructor(cveId: string | CveId);
+    /**
+     * builds a full CveCorePlus using provided metadata
+     * @param metadata the CveMetadata in CVE JSON 5.0 schema
+     * @returns
+     */
+    static fromCveMetadata(metadata: Partial<CveMetadata>): CveCorePlus;
     /**
      * builds a full CveCorePlus from a CveCore
      * @param cveCore a CveCore object

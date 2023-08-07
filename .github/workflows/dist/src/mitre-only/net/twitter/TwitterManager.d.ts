@@ -10,6 +10,7 @@
 import { InlineErrorV2 } from 'twitter-api-v2';
 import { IsoDateString } from '../../../common/IsoDateString.js';
 import { CveTweetData } from './CveTweetData.js';
+import { CveId } from '../../../core/CveRecord.js';
 export interface TwitterResp {
     id: string;
     text: string;
@@ -64,4 +65,6 @@ export declare class TwitterManager {
      */
     static getMyTwitterInfo(): Promise<void>;
     static findUntweeted(start: IsoDateString, stop: IsoDateString, dir: string): Promise<CveTweetData[]>;
+    static calculateNewCves(newCves?: any, tweetedCves?: any): Promise<CveId[]>;
+    static removeFromNew(cveids: string): Promise<string[]>;
 }

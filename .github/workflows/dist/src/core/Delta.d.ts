@@ -32,7 +32,7 @@ export declare class Delta {
      * @param start git log start time window
      * @param stop git log stop time window (defaults to now)
      * @param repository directory to get git info from (defaults to process.env.CVES_BASE_DIRECTORY)
-     * @param fullCveCore when set to true, it will read andfill CveCorePlus properties from the corresponding files in local repository
+     * @param fullCveCore when set to true, it will read and fill CveCorePlus properties from the corresponding files in local repository
      */
     static newDeltaFromGitHistory(start: string, stop?: string, repository?: string, fullCveCore?: boolean): Promise<Delta>;
     /** returns useful metadata given a repository filespec:
@@ -61,7 +61,7 @@ export declare class Delta {
      * @returns the total number of deltas in all the queues
      */
     calculateNumDelta(): number;
-    /** adds a cveCore object into one of the queues in a delta object
+    /** adds a CveCorePlus object into one of the queues in a delta object
      *  @param cve a CveCorePlus object to be added
      *  @param queue the DeltaQueue enum specifying which queue to add to
      */
@@ -70,7 +70,7 @@ export declare class Delta {
     toText(): string;
     /** writes the delta to a JSON file
      *  @param relFilepath relative path from current directory
-     */
+    */
     writeFile(relFilepath?: string): void;
     /**
      * Copies delta CVEs to a specified directory, and optionally zip the resulting directory

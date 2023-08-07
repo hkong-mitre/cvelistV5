@@ -30,6 +30,11 @@ export declare class TwitterLog {
      */
     nextNew(): CveTweetData;
     /**
+     * removes cveids from the new list
+     * @param cveids a single CVE ID string, or array of CVE ID string, or null, or undefined
+     */
+    removeNew(cveids: string | string[]): void;
+    /**
      * adds data to tweetedCves list, and removes it from the newCves list
      * @param data the CveTweetData that was successfully tweeted
      */

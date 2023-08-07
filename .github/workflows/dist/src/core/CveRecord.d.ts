@@ -25,7 +25,7 @@ export declare class CveRecord implements CveRecordV5 {
      *    (e.g., `./test/fixtures/cve/5`)
      *  @returns a CveRecord
      */
-    static fromCveId(cve_id: string | CveId, cves_directory?: any): CveRecord | undefined;
+    static fromCveId(cve_id: string | CveId, cves_directory?: string): CveRecord | undefined;
     /** factory method that synchronously reads in a CVE Record from a CVE JSON 5.0 formatted file
      *  @param relFilepath relative or full path to the file
      *  @returns a CveRecord
