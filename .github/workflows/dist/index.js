@@ -52432,7 +52432,7 @@ dotenv__WEBPACK_IMPORTED_MODULE_0__.config();
  *  The format follows semver for released software: Major.Minor.Patch, e.g., `1.0.0`
  *  However before release, it only uses the GitHub Project sprint number, e.g., `Sprint-1`
  */
-const version = `1.0.1+update+twitter_2023-08-07`;
+const version = `1.0.1+update+twitter_2023-08-08`;
 // import { MainCommands } from './commands/MainCommands.js';
 // const program = new MainCommands(version);
 // ----- MITRE-only ----- ----- ----
@@ -58340,6 +58340,8 @@ var esm_default = (/* unused pure expression or super */ null && (gitInstanceFac
 
 // EXTERNAL MODULE: ./node_modules/lodash/lodash.js
 var lodash = __nccwpck_require__(250);
+// EXTERNAL MODULE: ./node_modules/dotenv/lib/main.js
+var main = __nccwpck_require__(2437);
 ;// CONCATENATED MODULE: ./src/core/CveId.ts
 /**
  *  CveId is an object that represents a CVE ID and provides
@@ -58778,6 +58780,8 @@ class CveRecord {
 
 
 
+
+main.config();
 class CveCorePlus extends CveCore {
     description;
     /** optional field for storing timestamp when the update github action added
@@ -58841,7 +58845,7 @@ class CveCorePlus extends CveCore {
      */
     updateFromLocalRepository() {
         const filepath = `${this.cveId.getFullCvePath()}.json`;
-        // console.log(`filepath=${filepath}`);
+        console.log(`filepath=${filepath}`);
         const cve = CveRecord.fromJsonFile(filepath);
         if (cve) {
             this.set(cve.cveMetadata);
@@ -64384,8 +64388,6 @@ class MainCommands {
     }
 }
 
-// EXTERNAL MODULE: ./node_modules/dotenv/lib/main.js
-var main = __nccwpck_require__(2437);
 // EXTERNAL MODULE: ./node_modules/twitter-api-v2/dist/cjs/index.js
 var cjs = __nccwpck_require__(5395);
 // EXTERNAL MODULE: ./node_modules/@twitter-api-v2/plugin-rate-limit/dist/index.js
@@ -64400,6 +64402,7 @@ class CveTweetData {
     /** cveId is the only required field.  When reading tweets from twitter using the Twitter API, it needs
      *  to be rebuilt by fromTwitterApi() because it is encapsulated in Twitter's "text" field */
     cveId;
+    state; //"RESERVED" | "PUBLISHED" | "REJECTED";
     datePublished;
     tweeted;
     _description = undefined;
@@ -64470,16 +64473,19 @@ class CveTweetData {
      * @param tweetText optional calculated or copied text to be tweeted
      * @param tweeted optional calcuated or copied timestamp when tweeted
      */
-    constructor(cveId, description = undefined, datePublished = undefined, tweetText = undefined, tweeted = undefined) {
+    constructor(cveId, description = undefined, datePublished = undefined, tweetText = undefined, tweeted = undefined, state //"RESERVED" | "PUBLISHED" | "REJECTED";
+    ) {
         this.cveId = new CveId(cveId);
         this.description = description;
         this.datePublished = datePublished;
         this.tweetText = tweetText;
         this.tweeted = tweeted;
+        this.state = state;
     }
     /** builds a CveTweetData from a CveCorePlus object */
     static fromCveCorePlus(cvep) {
         const ctd = new CveTweetData(cvep.cveId, cvep.description, cvep.datePublished ? new IsoDateString(cvep.datePublished, true) : undefined);
+        ctd.state = cvep.state;
         ctd.buildTweetText();
         return ctd;
     }
@@ -64529,6 +64535,7 @@ class CveTweetData {
             cveId: this.cveId?.toJSON(),
             description: this.description,
             datePublished: this.datePublished?.toJSON(),
+            state: this.state,
             tweetText: this.tweetText,
             tweeted: this.tweeted?.toJSON(),
             twitter_id: this.twitter_id,
@@ -64783,7 +64790,6 @@ class TwitterManager {
             twitterlog = await TwitterLog.fromGit(TwitterLog.kFilename);
         }
         try {
-            // const twitterClient = new TwitterApi(TwitterManager.credentials);
             let numTweeted = 0;
             let item = twitterlog.nextNew();
             let twitterApiFailed = false;
@@ -64792,25 +64798,25 @@ class TwitterManager {
                 if (CveTweetData.hasCveIdOnly(item)) {
                     item = CveTweetData.fromCveIdString(item.cveId.toString());
                 }
-                // const tweetData = CveTweetData.buildCveTweetData(
-                //   item.cveId,
-                //   item.description,
-                //   item.datePublished,
-                // );
-                try {
-                    console.log(`about to tweet ${item.tweetText}`);
-                    const resp = await this.tweet(item.tweetText);
-                    numTweeted++;
-                    // the following line sometimes does not work, in which case, the second line can be used
-                    // item.setTweeted();
-                    // item.tweeted = new IsoDateString();
-                    twitterlog.pushAsTweeted(item);
-                    twitterlog.writeLogfile();
-                    item = twitterlog.nextNew();
+                if (item.state === 'PUBLISHED') {
+                    try {
+                        console.log(`about to tweet ${item.tweetText}`);
+                        const resp = await this.tweet(item.tweetText);
+                        numTweeted++;
+                        // the following line sometimes does not work, in which case, the second line can be used
+                        // item.setTweeted();
+                        // item.tweeted = new IsoDateString();
+                        twitterlog.pushAsTweeted(item);
+                        twitterlog.writeLogfile();
+                        item = twitterlog.nextNew();
+                    }
+                    catch (e) {
+                        console.log(`error:  `, e);
+                        twitterApiFailed = true;
+                    }
                 }
-                catch (e) {
-                    console.log(`error:  `, e);
-                    twitterApiFailed = true;
+                else {
+                    console.log(`NOT TWEETING ${item.cveId} because its state is ${item.state}`);
                 }
             }
             // twitterlog.cleanup()
@@ -64823,17 +64829,15 @@ class TwitterManager {
         }
     }
     /**
-     * using an array of CVE IDs, tweet the respective CVEs
+     * using an array of CVE IDs, tweet the respective CVEs with whatever necessary data is available
+     * Note that, unlike tweetNew(), this function is for admins, and it will tweet any specified CVE ID
+     * even if nomally under tweetNew() it would not be eligible to be tweeted (e.g, if the state is REJECTED)
      * @param ids array of strings representing CVE IDs
      * @returns number CVEs tweeted
      */
     static async tweetCveUsingCveId(id) {
         const twitterlog = TwitterLog.fromLogfile(TwitterLog.kFilename);
         try {
-            // let numTweeted = 0;
-            // let twitterApiFailed: boolean = false;
-            // let index = 0
-            // while (!twitterApiFailed && index < ids.length) {
             const cve = CveRecord.fromCveId(id);
             // console.log(`cve=${JSON.stringify(cve,null,2)}`)
             const cvep = CveCorePlus.fromCveRecord(cve);
@@ -64844,24 +64848,15 @@ class TwitterManager {
             }
             // console.log(`tweetCveUsingCveId().item=${JSON.stringify(item,null,2)}`)
             try {
-                console.log(`about to tweet ${item.tweetText}`);
+                console.log(`about to force tweet ${item.tweetText}`);
                 const resp = await this.tweet(item.tweetText);
-                // numTweeted++;
-                // the following line sometimes does not work, in which case, the second line can be used
-                // item.setTweeted();
-                // item.tweeted = new IsoDateString();
                 twitterlog.pushAsTweeted(item);
                 twitterlog.writeLogfile();
-                // item = twitterlog.nextNew();
             }
             catch (e) {
                 console.log(`error:  `, e);
-                // twitterApiFailed = true;
             }
-            // }
             // twitterlog.cleanup()
-            // twitterlog.writeLogfile(`${TwitterLog.kFilename}`);
-            // return numTweeted;
         }
         catch (e) {
             console.log(`Error from Twitter:`, e);

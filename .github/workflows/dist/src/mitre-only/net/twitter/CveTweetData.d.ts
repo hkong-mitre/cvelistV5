@@ -5,6 +5,7 @@ export declare class CveTweetData {
     /** cveId is the only required field.  When reading tweets from twitter using the Twitter API, it needs
      *  to be rebuilt by fromTwitterApi() because it is encapsulated in Twitter's "text" field */
     cveId: CveId;
+    state?: string;
     datePublished: IsoDateString | undefined;
     tweeted: IsoDateString | undefined;
     private _description;
@@ -33,7 +34,7 @@ export declare class CveTweetData {
      * @param tweetText optional calculated or copied text to be tweeted
      * @param tweeted optional calcuated or copied timestamp when tweeted
      */
-    constructor(cveId: CveId | string, description?: string, datePublished?: IsoDateString | undefined, tweetText?: string, tweeted?: IsoDateString);
+    constructor(cveId: CveId | string, description?: string, datePublished?: IsoDateString | undefined, tweetText?: string, tweeted?: IsoDateString, state?: string);
     /** builds a CveTweetData from a CveCorePlus object */
     static fromCveCorePlus(cvep: CveCorePlus): CveTweetData;
     /** returns a full CveTweetData object given a CVE ID string
@@ -53,6 +54,7 @@ export declare class CveTweetData {
         cveId: string;
         description: string;
         datePublished: string;
+        state: string;
         tweetText: string;
         tweeted: string;
         twitter_id: string;
