@@ -24,6 +24,7 @@ export declare class TwitterManager {
         accessSecret: string;
     };
     static __cveUrl: string;
+    static __accountId: string;
     /** constructor */
     private constructor();
     static tweetNewCves(useLogOnly?: boolean): Promise<number>;

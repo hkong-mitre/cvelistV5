@@ -21,7 +21,13 @@ export declare class CveTweetData {
      * @param str the tweet text
      */
     set tweetText(str: string);
+    /** the ID that twitter assigns */
     twitter_id?: string;
+    /** boolean set to
+     *    false (default) if built from CVE data
+     *    true if the CveTweetData was built from a query to twitter
+     */
+    builtFromTwitter: boolean;
     cveIdOnly(): boolean;
     static hasCveIdOnly(obj: any): boolean;
     buildTweetText(): string;
@@ -34,7 +40,9 @@ export declare class CveTweetData {
      * @param tweetText optional calculated or copied text to be tweeted
      * @param tweeted optional calcuated or copied timestamp when tweeted
      */
-    constructor(cveId: CveId | string, description?: string, datePublished?: IsoDateString | undefined, tweetText?: string, tweeted?: IsoDateString, state?: string);
+    constructor(cveId: CveId | string, description?: string, datePublished?: IsoDateString | undefined, tweetText?: string, tweeted?: IsoDateString, state?: string, //"RESERVED" | "PUBLISHED" | "REJECTED"
+    twitter_id?: string, builtFromTwitter?: boolean);
+    static fromJson(json: unknown): CveTweetData;
     /** builds a CveTweetData from a CveCorePlus object */
     static fromCveCorePlus(cvep: CveCorePlus): CveTweetData;
     /** returns a full CveTweetData object given a CVE ID string
@@ -58,6 +66,7 @@ export declare class CveTweetData {
         tweetText: string;
         tweeted: string;
         twitter_id: string;
+        builtFromTwitter: boolean;
     };
     /**
      * returns true iff this.tweeted is set

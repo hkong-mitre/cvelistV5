@@ -23,8 +23,14 @@ export declare class TwitterLog {
      *  either the newCves nor the tweetedCves queues
      * @param data a CveTweetData object
      */
-    addNew(data: CveTweetData): void;
-    addTweeted(data: CveTweetData): void;
+    addToNew(data: CveTweetData): void;
+    /** adds data to the tweeted list
+     *  Note that this can cause multiple instances of the same CVE, as this is useful for debugging
+     * @param data the CveTweetData to be added to the list
+     * @param allowRepeats boolean to enable/disable repeats in the tweeted list, useful for debugging use of twitter API, defaults to true
+     * @param fromTwitter optionally set the CveTweetData.builtFromTwitter flag
+    */
+    addToTweeted(data: CveTweetData | CveTweetData[], allowRepeats?: boolean, fromTwitter?: boolean): void;
     /**
      * returns the first newCve, BUT DOES NOT REMOVE IT in case the tweet failed
      */

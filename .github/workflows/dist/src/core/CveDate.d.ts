@@ -18,7 +18,7 @@
 import { IsoDateString } from '../common/IsoDateString.js';
 export declare class CveDate {
     /** the Date object this CveDate instance wraps */
-    _jsDate: Date;
+    private _jsDate;
     /** the constructor only creates a new CveDate based on an ISO date string
      *  @param isoDateStr a string represenation of a date in ISO/UTC/Z format
      *                    defaults to "now"
@@ -28,6 +28,8 @@ export declare class CveDate {
     asIsoDateString(): IsoDateString;
     /** returns a ISO/UTC formatted string in specified locale and time zone */
     asDateString(timeZone?: string): string;
+    /** returns as a JS Date object */
+    asDate(): Date;
     /** returns JS Date.toISOString() */
     toString(): string;
     /**

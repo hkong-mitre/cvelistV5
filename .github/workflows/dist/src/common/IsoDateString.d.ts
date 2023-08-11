@@ -12,6 +12,7 @@ export declare class IsoDateString {
     _date: Date;
     /** returns a IsoDateString object iff isoDateStr is a properly formatted ISO Date+Time+TZ string,
      *  or if a string is not specified, then this will create a IsoDateString of "now" using new Date()
+     *  Note that the constructor will always create a new IsoDateString containing a valid value, or it will throw an exception
      *  @param isoDateStr a properly formatted ISO Date+Time+TZ string (defaults to now)
      *  @param assumeZ set to true if want to assume a trailing Z for GMT/Zulu time zone (default is false)
      *                 this is needed because CVEs timestamps may be missing the timezone, and we are assuming it to be GMT
