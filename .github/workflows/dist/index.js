@@ -52430,9 +52430,9 @@ dotenv__WEBPACK_IMPORTED_MODULE_0__.config();
  *  It is an extra step to remember to do when deploying, but is a worthwhile step to keep 2 dependent repositories synchronized.
  *
  *  The format follows semver for released software: Major.Minor.Patch, e.g., `1.0.0`
- *  However before release, it only uses the GitHub Project sprint number, e.g., `Sprint-1`
+ *  However before release, it only uses the version number that it branched from, and appending it with `+feature_YYYY-MM-DD`, e.g., `1.0.1+twitter_2023-08-02`.
  */
-const version = `1.0.1+update+twitter_2023-08-11`;
+const version = `1.0.1+update+twitter_2023-08-26`;
 // import { MainCommands } from './commands/MainCommands.js';
 // const program = new MainCommands(version);
 // ----- MITRE-only ----- ----- ----
@@ -58773,8 +58773,9 @@ class CveRecord {
 ;// CONCATENATED MODULE: ./src/core/CveCorePlus.ts
 /**
  *  CveCorePlus extends CveCore by adding things that are useful
- *  for various purposes (e.g., activity logs, twitter):
- *      description from container.cna.description
+ *  for various purposes (e.g., activity logs, delta, twitter):
+ *  Currently, it adds:
+ *    - description from container.cna.description
  */
 
 
@@ -64469,7 +64470,7 @@ class CveTweetData {
         return this._tweetText;
     }
     // useful for detailed logging
-    detail;
+    // detail: CveCorePlus;
     // ----- constructor and factories ----- ----- ----- -----
     /**
      * constructs a CveTweetData
@@ -64746,17 +64747,38 @@ class TwitterLog {
      * cleans up the log:
      * 1. reverse chronologically orders tweetedCves
      * 2. truncates any tweetedCves older than timestamp
+     * 3. removes from newCves any CVE that are already in tweetedCves
      * @param timestamp the ISO timestamp before which CVEs tweeted will be removed
      */
-    cleanup(timestamp = undefined) {
-        // sort cves in descending order according to tweet timestamp
+    cleanup(timestamp) {
+        // ----- sort newCves and tweetedCves
+        //  sort in descending order according to datePublished/tweeted timestamps
+        //  (that is, sorts so that the newest CVEs are on top)
+        //  this is done so that if we use --add-to-new, these take precedence over what is automatically added
+        //  if tweeted is undefined, then it is treated as if it is latest (floats to top)
+        //  if there are multiple entries with undefined tweeted properties, they retain their current relative positions
+        this.newCves.sort((a, b) => (a.datePublished > b.datePublished ? -1 : 1));
         this.tweetedCves.sort((a, b) => (a.tweeted > b.tweeted ? -1 : 1));
-        // trim off cves that are older than TWITTER_JSON_KEEP_MINS
+        // ----- remove cves in tweetedCves that are older than TWITTER_JSON_KEEP_MINS
         const keepTimestamp = timestamp ??
-            new IsoDateString().minutesAgo(parseInt(process.env.TWITTER_JSON_KEEP_MINS));
-        if (timestamp) {
-            this.tweetedCves = this.tweetedCves.filter((item) => item.tweeted < keepTimestamp);
-        }
+            new IsoDateString().minutesAgo(parseInt(process.env.TWITTER_JSON_KEEP_HOURS) * 60);
+        const keepTimeTicks = keepTimestamp.toNumber();
+        // console.log(`keepTimestamp:  ${keepTimestamp}`);
+        // console.log(`keeptTimeTicks:  ${keepTimeTicks}`);
+        this.tweetedCves = this.tweetedCves.filter((item) => {
+            // console.log(`${item.cveId.toString()}: item.tweeted=${item.tweeted}`);
+            // console.log(`${item.cveId.toString()}: item.tweeted?.toNumber()=${item.tweeted?.toNumber()}`);
+            return (item.tweeted?.toNumber() >= keepTimeTicks);
+        });
+        // ----- remove from newCves any cves that are already in tweetedCves
+        //  somewhat faster if both arrays are already sorted and trimmed
+        this.newCves = this.newCves.filter((item) => {
+            // console.log(`item: ${item.cveId.toString()}`);
+            return !this.tweetedCves.find(tweeted => {
+                // console.log(`  tweeted: ${tweeted.cveId.toString()}`);
+                return item.cveId.toString() === tweeted.cveId.toString();
+            });
+        });
     }
     /**
      * resets the 'last_successful_tweet_timestamp' to the specified ISO date
@@ -64841,6 +64863,7 @@ class TwitterManager {
             // const todays = await TwitterManager.getRecentTweetsOnDate()
             // twitterlog.addToTweeted()
             let numTweeted = 0;
+            twitterlog.cleanup();
             let item = twitterlog.nextNew();
             let twitterApiFailed = false;
             while (!twitterApiFailed && item !== undefined) {
@@ -64884,6 +64907,7 @@ class TwitterManager {
      */
     static async tweetCveUsingCveId(id) {
         const twitterlog = TwitterLog.fromLogfile(TwitterLog.kFilename);
+        // twitterlog.cleanup()
         try {
             const cve = CveRecord.fromCveId(id);
             // console.log(`cve=${JSON.stringify(cve,null,2)}`)
@@ -64913,6 +64937,7 @@ class TwitterManager {
     static async setTweeterLogDate(date) {
         try {
             const twitterlog = await TwitterLog.fromLogfile();
+            twitterlog.cleanup();
             twitterlog.setLogDate(date);
             twitterlog.writeLogfile();
             return twitterlog.last_successful_tweet_timestamp;
@@ -65030,6 +65055,7 @@ class TwitterManager {
                 const tokens = element.text.split(' ');
                 const ctd = new CveTweetData(tokens[0], undefined, undefined, element.text, new IsoDateString(element.created_at));
                 ctd.twitter_id = element.id;
+                ctd.builtFromTwitter = true;
                 ret.push(ctd);
             });
             return ret;
@@ -65037,13 +65063,13 @@ class TwitterManager {
         catch (e) {
             if (e instanceof cjs.ApiResponseError) {
                 // console.log(`ApiResponseError from Twitter:`, e);
-                console.log(`ApiResponseError from twitter:`, {
+                console.log(`ApiResponseError from twitter:`, JSON.stringify({
                     error: true,
                     code: e.code,
                     headers: e.headers,
                     rateLimit: e.rateLimit,
                     data: e.data
-                });
+                }, null, 2));
             }
             else {
                 console.log(`Error from Twitter:`, e);
@@ -65096,6 +65122,7 @@ class TwitterManager {
     static async findUntweeted(start, stop, dir) {
         // try {
         const twitterLog = await TwitterLog.fromLogfile(TwitterLog.kFilename);
+        twitterLog.cleanup();
         const delta = await Delta.newDeltaFromGitHistory(start?.toString(), stop?.toString(), dir, true);
         let retval = [];
         if (delta.new.length > 0) {
@@ -65107,7 +65134,7 @@ class TwitterManager {
                 });
                 if (!found) {
                     const ctd = new CveTweetData(cve.cveId);
-                    ctd.detail = cve;
+                    // ctd.detail = cve;
                     twitterLog.addToNew(ctd);
                 }
             });
@@ -65145,6 +65172,7 @@ class TwitterManager {
         const ids = cveids.split(',');
         let retval = ids; //["CVE-1970-0001"]
         const twitterLog = TwitterLog.fromLogfile(TwitterLog.kFilename);
+        twitterLog.cleanup();
         ids.forEach(cveId => {
             const tweetData = new CveTweetData(cveId);
             twitterLog.removeNew(cveId);
@@ -65172,15 +65200,12 @@ class TwitterCommand extends GenericCommand {
             .command(name)
             .description('tweet newly published CVEs')
             // .option(
-            //   '--truncate-log-to <ISO date>',
-            //   'truncates the twitter_log file, removing everything before the specified ISO date, defaults to now',
-            //   new IsoDateString().toString(),
+            //   '--rebuild-twitterlog',
+            //   'rebuilds the twitter_log file using Github and twitter APIs'
             // )
             // .argument('<ids...>', 'one or more files to upload')
-            // .option(
-            //   '--add-to-new <id1,id2,id3>',
-            //   `adds CVE IDs to the "new" list to be tweeted next time the twitter subcommand is run [does not work as expected]`,
-            // )
+            .option('--add-to-new <id1,id2,id3>', `adds CVE IDs to the "new" list to be tweeted next time the twitter subcommand is run [does not work as expected]`)
+            .option('--append-to-json <json file>', `appends result to the named json file; for use with --show-tweeted`)
             .option('--clear-new', `clears out the newCves list, useful for administering twitter feeds when unexpected exceptions happen`)
             .option('--info', `shows twitter information about the account`)
             .option('--remove-from-new <id1,id2,id3>', `removes CVE IDs from twitter.log's "new" list (useful when the script is unable to tweet a specific CVE)`)
@@ -65219,7 +65244,7 @@ class TwitterCommand extends GenericCommand {
             twitterLog.writeLogfile(TwitterLog.kFilename);
             console.log(`twitter_log now contains ${twitterLog.newCves.length} new CVEs to be tweeted`);
         }
-        // ----- --show-limits
+        // ----- --show-remove-from-new
         else if (options.removeFromNew) {
             const resp = await TwitterManager.removeFromNew(options.removeFromNew);
             console.log(`resp=${JSON.stringify(resp)}`);
@@ -65245,8 +65270,23 @@ class TwitterCommand extends GenericCommand {
         else if (options.showTweeted) {
             const list = await TwitterManager.getRecentTweetsOnDate(options.showTweeted);
             // @todo remove tweets before --start
-            console.log(`${list.length} CVEs tweeted on ${options.showTweeted}:  `);
-            console.log(JSON.stringify(list, null, 2));
+            const json = {
+                type: "CVE Utils command JSON output",
+                version: `<version goes here>`,
+                command: {
+                    commandName: this._name,
+                    options,
+                },
+                // startIso: IsoDateString.fromNumber(this._startTimestamp).toString(),
+                data: {
+                    summaryText: [
+                        `${list.length} CVEs tweeted on ${options.showTweeted}`,
+                    ],
+                    numTweeted: list.length,
+                    tweetedCves: list
+                }
+            };
+            console.log(`${JSON.stringify(json, null, 2)}`);
         }
         // ----- tweet a list of CVE IDs
         else if (options.tweetCveids) {

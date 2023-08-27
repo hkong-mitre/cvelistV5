@@ -49,6 +49,7 @@ export declare class TwitterLog {
      * cleans up the log:
      * 1. reverse chronologically orders tweetedCves
      * 2. truncates any tweetedCves older than timestamp
+     * 3. removes from newCves any CVE that are already in tweetedCves
      * @param timestamp the ISO timestamp before which CVEs tweeted will be removed
      */
     cleanup(timestamp?: IsoDateString): void;

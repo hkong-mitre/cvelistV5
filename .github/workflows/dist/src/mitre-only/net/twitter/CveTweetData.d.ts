@@ -6,9 +6,9 @@ export declare class CveTweetData {
      *  to be rebuilt by fromTwitterApi() because it is encapsulated in Twitter's "text" field */
     cveId: CveId;
     state?: string;
-    datePublished: IsoDateString | undefined;
-    tweeted: IsoDateString | undefined;
-    private _description;
+    datePublished?: IsoDateString | undefined;
+    tweeted?: IsoDateString | undefined;
+    private _description?;
     get description(): string;
     set description(str: string);
     /** tweetText is optional.  It is built when tweeting a new CVE (using buildTweetText()), and it is
@@ -31,7 +31,6 @@ export declare class CveTweetData {
     cveIdOnly(): boolean;
     static hasCveIdOnly(obj: any): boolean;
     buildTweetText(): string;
-    detail: CveCorePlus;
     /**
      * constructs a CveTweetData
      * @param cveId required CveId object or CVE ID string
