@@ -19,8 +19,9 @@ export declare class TwitterLog {
      */
     static fromGit(twitterLogfile?: string, repository?: string, start?: string, stop?: string): Promise<TwitterLog>;
     /**
-     * adds a CveTweetData to the newCves queue iff it is not already in
-     *  either the newCves nor the tweetedCves queues
+     * adds a CveTweetData to the newCves queue iff
+     *  1. state is PUBLISHED (or undefined)
+     *  2. it is not already in either the newCves nor the tweetedCves queues
      * @param data a CveTweetData object
      */
     addToNew(data: CveTweetData): void;

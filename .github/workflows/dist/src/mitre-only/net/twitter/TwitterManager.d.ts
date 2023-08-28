@@ -29,13 +29,12 @@ export declare class TwitterManager {
     private constructor();
     static tweetNewCves(useLogOnly?: boolean): Promise<number>;
     /**
-     * using an array of CVE IDs, tweet the respective CVEs with whatever necessary data is available
+     * force tweets a single CVE ID using whatever necessary data is available from the repository JSON file
      * Note that, unlike tweetNew(), this function is for admins, and it will tweet any specified CVE ID
      * even if nomally under tweetNew() it would not be eligible to be tweeted (e.g, if the state is REJECTED)
-     * @param ids array of strings representing CVE IDs
-     * @returns number CVEs tweeted
+     * @param id string representing a single CVE ID
      */
-    static tweetCveUsingCveId(id: string): Promise<void>;
+    static forceTweetCveUsingCveId(id: string): Promise<void>;
     static setTweeterLogDate(date: IsoDateString): Promise<IsoDateString>;
     /**
      *

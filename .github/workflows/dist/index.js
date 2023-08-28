@@ -52432,7 +52432,7 @@ dotenv__WEBPACK_IMPORTED_MODULE_0__.config();
  *  The format follows semver for released software: Major.Minor.Patch, e.g., `1.0.0`
  *  However before release, it only uses the version number that it branched from, and appending it with `+feature_YYYY-MM-DD`, e.g., `1.0.1+twitter_2023-08-02`.
  */
-const version = `1.0.1+update+twitter_2023-08-26`;
+const version = `1.0.1+update+twitter_2023-08-28`;
 // import { MainCommands } from './commands/MainCommands.js';
 // const program = new MainCommands(version);
 // ----- MITRE-only ----- ----- ----
@@ -64655,21 +64655,26 @@ class TwitterLog {
         const delta = await Delta.newDeltaFromGitHistory(start, stop, repository, true);
         // console.log(`delta from git:  ${JSON.stringify(delta, null, 2)}`);
         delta.new.forEach((cvep) => {
-            const ctd = CveTweetData.fromCveCorePlus(cvep);
-            twitterLog.addToNew(ctd);
+            if (cvep.state && cvep.state === 'PUBLISHED') {
+                const ctd = CveTweetData.fromCveCorePlus(cvep);
+                twitterLog.addToNew(ctd);
+            }
         });
         return twitterLog;
     }
     // ----- log operations ----- ----- ----- ----- ----- ----- ----- ----- -----
     /**
-     * adds a CveTweetData to the newCves queue iff it is not already in
-     *  either the newCves nor the tweetedCves queues
+     * adds a CveTweetData to the newCves queue iff
+     *  1. state is PUBLISHED (or undefined)
+     *  2. it is not already in either the newCves nor the tweetedCves queues
      * @param data a CveTweetData object
      */
     addToNew(data) {
-        if (!this.tweetedCves.find((ctd) => ctd.cveId.toString() === data.cveId.toString()) &&
-            !this.newCves.find((ctd) => ctd.cveId.toString() === data.cveId.toString())) {
-            this.newCves.push(data);
+        if (data.state === undefined || data.state == 'PUBLISHED') {
+            if (!this.tweetedCves.find((ctd) => ctd.cveId.toString() === data.cveId.toString()) &&
+                !this.newCves.find((ctd) => ctd.cveId.toString() === data.cveId.toString())) {
+                this.newCves.push(data);
+            }
         }
     }
     /** adds data to the tweeted list
@@ -64899,13 +64904,12 @@ class TwitterManager {
         }
     }
     /**
-     * using an array of CVE IDs, tweet the respective CVEs with whatever necessary data is available
+     * force tweets a single CVE ID using whatever necessary data is available from the repository JSON file
      * Note that, unlike tweetNew(), this function is for admins, and it will tweet any specified CVE ID
      * even if nomally under tweetNew() it would not be eligible to be tweeted (e.g, if the state is REJECTED)
-     * @param ids array of strings representing CVE IDs
-     * @returns number CVEs tweeted
+     * @param id string representing a single CVE ID
      */
-    static async tweetCveUsingCveId(id) {
+    static async forceTweetCveUsingCveId(id) {
         const twitterlog = TwitterLog.fromLogfile(TwitterLog.kFilename);
         // twitterlog.cleanup()
         try {
@@ -65293,7 +65297,7 @@ class TwitterCommand extends GenericCommand {
             const ids = options.tweetCveids.split(',');
             console.log(`tweet ${JSON.stringify(ids)}`);
             ids.forEach(async (cveId) => {
-                const resp = await TwitterManager.tweetCveUsingCveId(cveId);
+                const resp = await TwitterManager.forceTweetCveUsingCveId(cveId);
                 console.log(`after tweeting '${cveId}', got this response:  ${JSON.stringify(resp, null, 2)}`);
             });
         }
