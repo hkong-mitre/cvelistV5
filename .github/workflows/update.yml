@@ -21,6 +21,14 @@ on:
         description: 'command line arguments to update'
         required: false
         default: ''
+
+concurrency:
+  # This prevents multiple instances of this action from running at the same time. 
+  # Attempting to run multiple times will cancel existing pending runs except for "this" latest run.
+  # This will keep the latest pending instance in the queue.
+  # This will not cancel or early abort runs in progress.
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   update-cves:
     environment: development
