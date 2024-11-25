@@ -44,7 +44,7 @@ jobs:
           fetch-depth: 0
           
       - name: Download twitter_log.json
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: twitter.yml
           workflow_conclusion: success
@@ -75,11 +75,11 @@ jobs:
           
       - name: Upload twitter_log.json
         if: success() || failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: twitterlog
           path: ./twitter_log.json
-          
+          overwrite: true
       - name: output
         uses: actions/github-script@v6
         with:
